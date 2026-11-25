@@ -136,7 +136,7 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
 (function () {
   'use strict';
   var KEY = 'pipmaths.v1', SKEY = 'pipmaths.session';
-  var MATHS_LESSONS = 373, ENGLISH_LESSONS = 81, EKEY = 'uplore.english.v1';
+  var MATHS_LESSONS = 373, ENGLISH_LESSONS = 86, EKEY = 'uplore.english.v1';
   function read(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
   function write(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
