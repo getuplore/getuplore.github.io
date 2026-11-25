@@ -54,6 +54,32 @@ header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:s
 .prog .bar{height:8px;border-radius:99px;background:#e9ecef;margin-top:6px;overflow:hidden}.prog .bar i{display:block;height:100%;background:var(--c);border-radius:99px}
 .note{margin-top:clamp(18px,4vw,30px);display:flex;gap:12px;align-items:flex-start;background:#ffffffb3;border:2px dashed var(--line);border-radius:18px;padding:14px 16px;font-size:15px;color:var(--muted)}
 .note b{color:var(--ink)}
+.who .add{border-style:dashed;padding:6px 16px;color:var(--teal)}
+.hbtn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:12px;font-weight:700;font-size:15px;border:2px solid var(--line);background:var(--surface)}
+.hbtn.pri{background:var(--teal);border-color:var(--teal);color:#fff}
+.acct .btns{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:6px}
+.sheet{position:fixed;inset:0;background:#22303c66;display:grid;place-items:center;padding:16px;z-index:10;overflow:auto}
+.sheet[hidden]{display:none}
+.card{width:min(440px,100%);background:var(--surface);border-radius:24px;padding:24px;box-shadow:0 20px 60px #22303c33;position:relative}
+.card h3{font-size:28px;margin-bottom:6px}
+.card p.sub{margin:0 0 14px;color:var(--muted);font-size:15px}
+.card .x{position:absolute;top:12px;right:12px;width:40px;height:40px;border-radius:50%;font-size:24px;line-height:1;color:var(--muted)}
+.card label{display:block;font-weight:700;font-size:14px;margin:12px 0 6px;color:var(--muted)}
+.card input{width:100%;min-height:48px;border:2px solid var(--line);border-radius:12px;padding:0 14px;font:inherit;background:#fff;color:var(--ink)}
+.card input:focus{border-color:var(--teal);outline:none}
+.pw{position:relative}.pw input{padding-right:72px}.pw button{position:absolute;right:6px;top:6px;height:36px;padding:0 10px;border-radius:8px;font-size:13px;font-weight:700;color:var(--teal)}
+.card .go{width:100%;margin-top:18px;min-height:50px;border-radius:14px;background:var(--teal);color:#fff;font-weight:800;font-size:17px}
+.card .go:disabled{opacity:.5;cursor:default}
+.card .links{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:14px;font-size:14px}
+.card .links button{color:var(--teal);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.card .msg{margin-top:12px;font-size:14px;border-radius:12px;padding:10px 12px}
+.card .msg.err{background:#fff1f0;color:#b42318}.card .msg.ok{background:#e9f7f4;color:#1d6b60}
+.card .msg:empty{display:none}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opts button{min-width:52px;min-height:44px;border-radius:12px;border:2px solid var(--line);font-weight:700;padding:0 10px}
+.opts button[aria-pressed=true]{border-color:var(--teal);background:#e9f7f4}
+.sws{display:flex;gap:10px;flex-wrap:wrap}.sws button{width:40px;height:40px;border-radius:50%;background:var(--c);border:3px solid #fff;box-shadow:0 0 0 2px var(--line)}
+.sws button[aria-pressed=true]{box-shadow:0 0 0 3px var(--c)}
 footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}
 @media (max-width:520px){.acct{text-align:left;width:100%}.tile{min-height:0}}
 @media (prefers-reduced-motion:reduce){.tile.live{transition:none}}
@@ -71,7 +97,7 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
 
   <section class="hero">
     <h2 id="hello">What shall we learn today?</h2>
-    <p>One home for the whole family: pick a learner, then a subject. Progress is saved for each learner.</p>
+    <p id="lead"></p>
     <div class="who" id="who"></div>
   </section>
 
@@ -81,6 +107,7 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
 
   <footer><span>© Uplore</span><a href="maths/privacy.html">Privacy</a></footer>
 </div>
+<div class="sheet" id="sheet" hidden><div class="card" role="dialog" aria-modal="true" aria-labelledby="st"><button class="x" id="sx" aria-label="Close">×</button><div id="sc"></div></div></div>
 
 <script>
 // Uplore home. Reads the same learners and sign-in as Pip Maths (same web address, same storage).
@@ -117,14 +144,21 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
 
   function render() {
     var p = learner();
-    $('hello').textContent = p ? 'Hello, ' + p.name + '! What shall we learn today?' : 'What shall we learn today?';
+    var signed = !!(session && session.user && session.user.email);
+    $('hello').textContent = !signed ? 'Welcome to Uplore' : p ? 'Hello, ' + p.name + '! What shall we learn today?' : 'What shall we learn today?';
+    $('lead').textContent = signed ? 'One home for the whole family: pick a learner, then a subject. Progress is saved for each learner.' : 'Maths, English and more for the whole family, from JK to grown-ups. Sign in, or create a free family account, to start learning.';
     // Learner chips
     var who = $('who');
-    if (!state.profiles.length) who.innerHTML = '<span class="lab">No learners yet.</span> <a class="chip" href="maths/" style="padding:6px 16px"><b>Add a learner in Maths →</b></a>';
+    var email = session && session.user && session.user.email;
+    var addBtn = '<button class="chip add" id="addl">+ Add a learner</button>';
+    if (!email) who.innerHTML = '<button class="hbtn pri" id="sin2">Sign in to start</button><button class="hbtn" id="sup3">Create a free family account</button>';
+    else if (!state.profiles.length) who.innerHTML = '<span class="lab">No learners yet.</span> ' + addBtn;
     else who.innerHTML = '<span class="lab">Who is learning?</span>' + state.profiles.map(function (q) {
-      return '<button class="chip" data-id="' + esc(q.id) + '" aria-pressed="' + (q.id === state.active) + '"><i style="background:' + esc(q.color || '#2f9e8f') + '">' + esc((q.name || '?').charAt(0).toUpperCase()) + '</i><span>' + esc(q.name) + '<small>age ' + esc(q.age) + '</small></span></button>';
-    }).join('');
-    Array.prototype.forEach.call(who.querySelectorAll('button.chip'), function (b) {
+      return '<button class="chip" data-id="' + esc(q.id) + '" aria-pressed="' + (q.id === state.active) + '"><i style="background:' + esc(q.color || '#2f9e8f') + '">' + esc((q.name || '?').charAt(0).toUpperCase()) + '</i><span>' + esc(q.name) + '<small>' + (q.age > 18 ? 'grown-up' : 'age ' + esc(q.age)) + '</small></span></button>';
+    }).join('') + addBtn;
+    if (email) $('addl').onclick = function () { open('learner'); };
+    else { $('sin2').onclick = function () { open('signin'); }; $('sup3').onclick = function () { open('signup'); }; }
+    Array.prototype.forEach.call(who.querySelectorAll('button.chip[data-id]'), function (b) {
       b.onclick = function () { state.active = b.getAttribute('data-id'); if (!demo) { var s = read(KEY) || state; s.active = state.active; write(KEY, s); } render(); };
     });
     // Subject tiles
@@ -132,15 +166,18 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
     $('subjects').innerHTML = SUBJECTS.map(function (s) {
       var prog = s.id === 'maths' && p ? '<div class="prog">' + esc(p.name) + ': ' + st.tried + (st.tried === 1 ? ' lesson' : ' lessons') + ' practised · ' + st.mastered + ' mastered<div class="bar"><i style="width:' + Math.min(100, Math.round(st.tried / MATHS_LESSONS * 100)) + '%"></i></div></div>' : '';
       var inner = '<div class="ic">' + s.icon + '</div><h3>' + s.name + '</h3><p>' + s.text + '</p>' + prog + (s.live ? '<span class="go">Open ' + s.name + ' →</span>' : '<span class="soon">' + s.soon + '</span>');
+      if (s.live && !signed) return '<button class="tile live" style="--c:' + s.c + ';text-align:left" data-signin>' + inner.replace('Open ' + s.name + ' →', 'Sign in to open ' + s.name) + '</button>';
       return s.live ? '<a class="tile live" style="--c:' + s.c + '" href="' + s.href + '">' + inner + '</a>' : '<div class="tile" style="--c:' + s.c + '" aria-disabled="true">' + inner + '</div>';
     }).join('');
+    Array.prototype.forEach.call(document.querySelectorAll('[data-signin]'), function (t) { t.onclick = function () { open('signin'); }; });
     // Account
-    var email = session && session.user && session.user.email;
-    $('acct').innerHTML = email ? 'Family account<br><b>' + esc(email) + '</b><br><button class="out" id="out">Sign out</button><span class="warn" id="warn" hidden></span>' : '<a href="maths/">Sign in</a> to back up and sync';
-    if (email) $('out').onclick = signOut;
+    $('acct').innerHTML = email ? 'Family account<br><b>' + esc(email) + '</b><br><button class="out" id="out">Sign out</button><span class="warn" id="warn" hidden></span>'
+      : '<div class="btns"><button class="hbtn pri" id="sin">Sign in</button><button class="hbtn" id="sup">Create account</button></div>';
+    if (email) $('out').onclick = signOut; else { $('sin').onclick = function () { open('signin'); }; $('sup').onclick = function () { open('signup'); }; }
     $('note').innerHTML = email
-      ? '<span>☁️</span><span><b>Backed up.</b> Learners and progress sync across your devices. Manage the family account in Maths → Grown-ups.</span>'
-      : '<span>📱</span><span><b>Everything works without an account.</b> Learners and progress are kept on this device. To back up and use them on other devices, create a family account in Maths → Grown-ups.</span>';
+      ? '<span>☁️</span><span><b>Backed up.</b> Learners and progress sync across your devices. More account options are in Maths → Grown-ups.</span>'
+      : '<span>🔒</span><span><b>A free family account keeps everyone\'s progress safe.</b> One account for the whole family: add each learner, and their progress follows them on every device. <button class="out" id="sup2" style="min-height:0;margin:0">Create one now</button>.</span>';
+    if (!email) $('sup2').onclick = function () { open('signup'); };
   }
   // Sign out, the same way Maths does it: only when everything is backed up (or on a second tap),
   // then end this device's session and clear this family's learners from the device.
@@ -163,6 +200,163 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
     session = null; state = { profiles: [], active: null, settings: state.settings || {} }; armed = false;
     render();
   }
+  // ---------- Family account on the home page (same account, storage and rules as Maths) ----------
+  var SCHEMA = 'Math_schema', HOME = location.origin + location.pathname.replace(/[^/]*$/, '');
+  function niceError(d, code) {
+    var m = (d && (d.msg || d.message || d.error_description || d.error)) || '';
+    if (/invalid login credentials/i.test(m)) return 'That email and password do not match.';
+    if (/email not confirmed/i.test(m)) return 'Please confirm your email first: open the link we sent you.';
+    if (/already registered|already been registered|user_already_exists/i.test(m)) return 'There is already an account with that email. Try signing in.';
+    if (/password/i.test(m) && /(short|least|weak)/i.test(m)) return 'Please use a longer password (at least 8 characters).';
+    if (/rate limit|too many/i.test(m) || code === 429) return 'Too many tries. Please wait a few minutes.';
+    return m || 'Something went wrong (' + code + ').';
+  }
+  async function call(path, opt) {
+    opt = opt || {};
+    var h = { apikey: SBKEY, 'Content-Type': 'application/json' };
+    if (path.indexOf('/rest/') === 0) { h['Accept-Profile'] = SCHEMA; h['Content-Profile'] = SCHEMA; }
+    if (opt.token) h.Authorization = 'Bearer ' + opt.token;
+    var r;
+    try { r = await fetch(SB + path, { method: opt.method || 'GET', headers: h, body: opt.body === undefined ? undefined : JSON.stringify(opt.body) }); }
+    catch (e) { throw new Error('No internet connection. Please try again.'); }
+    var text = await r.text(), d = null; try { d = text ? JSON.parse(text) : null; } catch (e) { d = text; }
+    if (!r.ok) throw new Error(niceError(d, r.status));
+    return d;
+  }
+  function keepSession(d, user) {
+    var sess = { access_token: d.access_token, refresh_token: d.refresh_token, expires_at: +d.expires_at || Math.floor(Date.now() / 1000) + (+d.expires_in || 3600), user: user || d.user };
+    write(SKEY, sess); session = sess; return sess;
+  }
+  // Bring this family's learners onto the device; newest change wins, like Maths. Learners made on this
+  // device before signing in stay, and Maths backs them up to the account the next time it opens.
+  async function pull() {
+    var rows = await call('/rest/v1/learners?select=id,name,data,deleted', { token: session.access_token });
+    var fam = await call('/rest/v1/families?select=settings', { token: session.access_token });
+    var s = read(KEY) || { profiles: [], active: null, settings: {} }, syn = read('pipmaths.synced') || {}, byId = {}, order = [];
+    s.profiles = s.profiles || []; s.settings = s.settings || {};
+    s.profiles.forEach(function (p) { byId[p.id] = p; order.push(p.id); });
+    (rows || []).forEach(function (r) {
+      if (r.deleted) return;
+      var data = r.data || {}, remote = {}; for (var k in data) if (k !== 'mode') remote[k] = data[k];
+      remote.id = r.id; remote.name = r.name;
+      var local = byId[r.id];
+      if (!local || (remote.t || 0) > (local.t || 0)) { if (!local) order.push(r.id); byId[r.id] = remote; syn[r.id] = body(remote); }
+    });
+    s.profiles = order.map(function (id) { return byId[id]; });
+    var rs = fam && fam[0] && fam[0].settings; if (rs && rs.region) for (var k2 in rs) s.settings[k2] = rs[k2];
+    if (!s.active && s.profiles.length === 1) s.active = s.profiles[0].id;
+    write(KEY, s); write('pipmaths.synced', syn); state = s;
+  }
+  async function afterSignIn(d) {
+    keepSession(d);
+    if (!session.user || !session.user.id) { var u = await call('/auth/v1/user', { token: session.access_token }); keepSession(d, u); }
+    await pull();
+  }
+
+  // Email links come back here with the session in the address (#access_token=...&type=signup|recovery).
+  function fromEmailLink() {
+    var hs = location.hash || ''; if (!/access_token=|error_description=/.test(hs)) return;
+    var q = {}; hs.slice(1).split('&').forEach(function (kv) { var i = kv.indexOf('='); if (i > 0) q[decodeURIComponent(kv.slice(0, i))] = decodeURIComponent(kv.slice(i + 1).replace(/\+/g, ' ')); });
+    history.replaceState(null, '', location.pathname + location.search);
+    if (q.error_description) { open('signin', q.error_description + ' Please try again.'); return; }
+    afterSignIn(q).then(function () { render(); if (q.type === 'recovery') open('newpw'); else open('done', 'Your email is confirmed and you are signed in.'); })
+      .catch(function (e) { open('signin', e.message); });
+  }
+
+  var COLORS = ['#ff8a3d', '#4dabf7', '#5cc96b', '#9775fa', '#ff6b8a', '#ffb020'];
+  var REGIONS = [['india', 'India'], ['us', 'USA'], ['canada', 'Canada'], ['uk', 'UK']];
+  function guessRegion() {
+    var l = (navigator.language || '').toLowerCase(), tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+    if (/-in$/.test(l) || /Kolkata|Calcutta/.test(tz)) return 'india';
+    if (/-ca$/.test(l) || /Toronto|Vancouver|Edmonton|Winnipeg|Halifax|Regina|St_Johns|Montreal/.test(tz)) return 'canada';
+    if (/-gb$/.test(l) || /London/.test(tz)) return 'uk';
+    if (/-us$/.test(l) || /America\//.test(tz)) return 'us';
+    return 'india';
+  }
+  function pwField(id, auto) { return '<div class="pw"><input id="' + id + '" type="password" autocomplete="' + auto + '"' + (auto === 'new-password' ? ' minlength="8"' : '') + ' required><button type="button" data-show="' + id + '">Show</button></div>'; }
+  var VIEWS = {
+    signin: function () { return '<h3 id="st">Sign in</h3><p class="sub">Your family\'s learners and progress, on every device.</p><form id="f" autocomplete="on">' +
+      '<label for="em">Email</label><input id="em" type="email" autocomplete="username" required>' +
+      '<label for="pw">Password</label>' + pwField('pw', 'current-password') +
+      '<button class="go" type="submit">Sign in</button><div class="msg" id="msg"></div>' +
+      '<div class="links"><button type="button" data-v="forgot">Forgot password?</button><button type="button" data-v="signup">Create an account</button></div></form>'; },
+    signup: function () { return '<h3 id="st">Create a family account</h3><p class="sub">Free. Backs up every learner and keeps them in step across your devices.</p><form id="f" autocomplete="on">' +
+      '<label for="em">Email</label><input id="em" type="email" autocomplete="username" required>' +
+      '<label for="pw">Password (at least 8 characters)</label>' + pwField('pw', 'new-password') +
+      '<button class="go" type="submit">Create account</button><div class="msg" id="msg"></div>' +
+      '<div class="links"><span></span><button type="button" data-v="signin">I already have an account</button></div></form>'; },
+    forgot: function () { return '<h3 id="st">Reset your password</h3><p class="sub">We will email you a link to choose a new password.</p><form id="f">' +
+      '<label for="em">Email</label><input id="em" type="email" autocomplete="username" required>' +
+      '<button class="go" type="submit">Send the link</button><div class="msg" id="msg"></div>' +
+      '<div class="links"><button type="button" data-v="signin">Back to sign in</button></div></form>'; },
+    newpw: function () { return '<h3 id="st">Choose a new password</h3><p class="sub">You are signed in. Pick a new password for next time.</p><form id="f">' +
+      '<input type="email" autocomplete="username" value="' + esc(session && session.user && session.user.email || '') + '" hidden>' +
+      '<label for="pw">New password (at least 8 characters)</label>' + pwField('pw', 'new-password') +
+      '<button class="go" type="submit">Save password</button><div class="msg" id="msg"></div></form>'; },
+    done: function () { return '<h3 id="st">All set</h3><div class="msg ok" id="msg"></div><button class="go" type="button" data-close>OK</button>'; },
+    learner: function () {
+      var hasRegion = !!(state.settings && state.settings.region), rg = hasRegion ? state.settings.region : guessRegion();
+      var ages = []; for (var a = 3; a <= 19; a++) ages.push(a);
+      return '<h3 id="st">Add a learner</h3><p class="sub">A name, a colour and an age. Lessons match the age.</p><form id="f">' +
+        (hasRegion ? '' : '<label>Country</label><div class="opts" id="rg">' + REGIONS.map(function (r) { return '<button type="button" data-r="' + r[0] + '" aria-pressed="' + (r[0] === rg) + '">' + r[1] + '</button>'; }).join('') + '</div>') +
+        '<label for="nm">Name</label><input id="nm" maxlength="20" autocomplete="off" placeholder="Type a name" required>' +
+        '<label>Colour</label><div class="sws" id="sw">' + COLORS.map(function (c, i) { return '<button type="button" style="--c:' + c + '" data-c="' + c + '" aria-label="Colour ' + (i + 1) + '" aria-pressed="' + (i === state.profiles.length % COLORS.length) + '"></button>'; }).join('') + '</div>' +
+        '<label>Age</label><div class="opts" id="ag">' + ages.map(function (a) { return '<button type="button" data-a="' + a + '" aria-pressed="false">' + (a === 19 ? 'Grown-up' : a) + '</button>'; }).join('') + '</div>' +
+        '<button class="go" type="submit" disabled>Add learner</button></form>';
+    }
+  };
+  function close() { $('sheet').hidden = true; }
+  $('sx').onclick = close;
+  $('sheet').addEventListener('click', function (e) { if (e.target === $('sheet')) close(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('sheet').hidden) close(); });
+  function say(text, ok) { var m = $('msg'); if (m) { m.className = 'msg ' + (ok ? 'ok' : 'err'); m.textContent = text || ''; } }
+  function busy(on, label) { var b = document.querySelector('#f .go'); if (b) { b.disabled = on; if (label) b.textContent = label; } }
+  function open(view, note) {
+    $('sc').innerHTML = VIEWS[view](); $('sheet').hidden = false;
+    Array.prototype.forEach.call($('sc').querySelectorAll('[data-v]'), function (b) { b.onclick = function () { open(b.getAttribute('data-v')); }; });
+    Array.prototype.forEach.call($('sc').querySelectorAll('[data-show]'), function (b) { b.onclick = function () { var i = $(b.getAttribute('data-show')); i.type = i.type === 'password' ? 'text' : 'password'; b.textContent = i.type === 'password' ? 'Show' : 'Hide'; }; });
+    Array.prototype.forEach.call($('sc').querySelectorAll('[data-close]'), function (b) { b.onclick = close; });
+    if (note) say(note, view === 'done');
+    var first = $('sc').querySelector('input:not([hidden])'); if (first) setTimeout(function () { try { first.focus(); } catch (e) {} }, 50);
+    var f = $('f'); if (!f) return;
+    if (view === 'learner') return learnerForm(f);
+    f.onsubmit = async function (e) {
+      e.preventDefault(); say('');
+      var em = $('em') && $('em').value.trim(), pw = $('pw') && $('pw').value, label = document.querySelector('#f .go').textContent;
+      busy(true, 'Please wait…');
+      try {
+        if (view === 'signin') { await afterSignIn(await call('/auth/v1/token?grant_type=password', { method: 'POST', body: { email: em, password: pw } })); close(); render(); }
+        else if (view === 'signup') {
+          var d = await call('/auth/v1/signup?redirect_to=' + encodeURIComponent(HOME), { method: 'POST', body: { email: em, password: pw } });
+          if (d && d.access_token) { await afterSignIn(d); close(); render(); }
+          else { open('done', 'Nearly done! We sent a link to ' + em + '. Open it on this device to finish, then you can add learners and start.'); return; }
+        }
+        else if (view === 'forgot') { await call('/auth/v1/recover?redirect_to=' + encodeURIComponent(HOME), { method: 'POST', body: { email: em } }); open('done', 'If there is an account for ' + em + ', a reset link is on its way. Open it on this device.'); return; }
+        else if (view === 'newpw') { await call('/auth/v1/user', { method: 'PUT', token: session.access_token, body: { password: pw } }); open('done', 'Your new password is saved.'); return; }
+      } catch (err) { say(err.message); }
+      busy(false, label);
+    };
+  }
+  function learnerForm(f) {
+    if (!session) { open('signin'); return; }
+    var d = { name: '', age: null, color: COLORS[state.profiles.length % COLORS.length], region: (state.settings && state.settings.region) || guessRegion() };
+    var go = f.querySelector('.go'), check = function () { go.disabled = !(d.name.trim() && d.age); };
+    function pick(box, attr, set) { Array.prototype.forEach.call(box.querySelectorAll('button'), function (b) { b.onclick = function () { set(b.getAttribute(attr)); Array.prototype.forEach.call(box.querySelectorAll('button'), function (x) { x.setAttribute('aria-pressed', String(x === b)); }); check(); }; }); }
+    if ($('rg')) pick($('rg'), 'data-r', function (v) { d.region = v; });
+    pick($('sw'), 'data-c', function (v) { d.color = v; });
+    pick($('ag'), 'data-a', function (v) { d.age = +v; });
+    $('nm').oninput = function () { d.name = this.value; check(); };
+    f.onsubmit = function (e) {
+      e.preventDefault(); if (!(d.name.trim() && d.age)) return;
+      var s = read(KEY) || { profiles: [], active: null, settings: { sound: true, voice: true } };
+      s.profiles = s.profiles || []; s.settings = s.settings || { sound: true, voice: true };
+      if (!s.settings.region) s.settings.region = d.region;
+      // Same shape as a learner made in Maths (store.js addProfile). "t" marks it as changed, so Maths backs it up.
+      var p = { id: 'p' + Date.now().toString(36), name: d.name.trim().slice(0, 20), age: d.age, board: undefined, lang: 'en', color: d.color, modeOverride: null, created: Date.now(), progress: {}, bests: {}, coins: 0, stickers: [], t: Date.now() };
+      s.profiles.push(p); s.active = p.id; write(KEY, s); state = s; close(); render();
+    };
+  }
+  fromEmailLink();
   render();
   window.addEventListener('storage', function (e) { if (e.key === KEY || e.key === SKEY) { state = read(KEY) || state; session = read(SKEY); render(); } });
 })();
