@@ -538,7 +538,7 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
       box.innerHTML = '<h4>Admin (only you see this)</h4><div class="kpis"><div><b>' + esc(o.families) + '</b><span>families</span></div><div><b>' + esc(o.learners) + '</b><span>learners</span></div><div><b>' + esc(o.active7) + '</b><span>active this week</span></div><div><b>' + esc(o.newFamilies30) + '</b><span>new families (30 days)</span></div></div>' +
         '<p class="admline"><b>Countries:</b> ' + list(o.byCountry, REGION_NAMES) + '<br><b>Age groups:</b> ' + list(o.byMode, MODE_NAMES) + '</p>' +
         (top ? '<p class="admline"><b>Most practised lessons</b></p><ol>' + top + '</ol>' : '') +
-        '<div class="btnrow"><a class="hbtn sm" href="maths/#admin">Maths: every lesson in every mode →</a></div>';
+        '<div class="btnrow"><a class="hbtn sm" href="maths/#admin">Maths: every lesson in every mode →</a><a class="hbtn sm" href="maths/diag.html">Device check</a></div>';
     } catch (e) { if ($('gadm')) box.innerHTML = '<h4>Admin</h4><div class="gst">' + esc(e.message) + '</div>'; }
   }
   // Maths sends visitors here to sign in (#signin), or after their sign-in ended (#signin-again).
