@@ -352,9 +352,21 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
       s.profiles = s.profiles || []; s.settings = s.settings || { sound: true, voice: true };
       if (!s.settings.region) s.settings.region = d.region;
       // Same shape as a learner made in Maths (store.js addProfile). "t" marks it as changed, so Maths backs it up.
-      var p = { id: 'p' + Date.now().toString(36), name: d.name.trim().slice(0, 20), age: d.age, board: undefined, lang: 'en', color: d.color, modeOverride: null, created: Date.now(), progress: {}, bests: {}, coins: 0, stickers: [], t: Date.now() };
+      var p = { id: 'p' + Date.now().toString(36), name: d.name.trim().slice(0, 20), age: d.age, lang: 'en', color: d.color, modeOverride: null, created: Date.now(), progress: {}, bests: {}, coins: 0, stickers: [], t: Date.now() };
       s.profiles.push(p); s.active = p.id; write(KEY, s); state = s; close(); render();
+      backup(p);
     };
+  }
+  // Back up a new learner straight away (same row format as Maths: cloud.js toRow), so it is safe in the account.
+  function backup(p) {
+    if (!session || !session.user || !session.user.id) return;
+    var data = {}; for (var k in p) if (k !== 'id' && k !== 'name') data[k] = p[k];
+    data.mode = p.modeOverride || (p.age <= 7 ? 'little' : p.age <= 13 ? 'explore' : p.age <= 18 ? 'achieve' : 'adult');
+    var row = { family_id: session.user.id, id: p.id, name: String(p.name).slice(0, 40), data: data, deleted: false };
+    fetch(SB + '/rest/v1/learners?on_conflict=family_id,id', { method: 'POST', headers: { apikey: SBKEY, Authorization: 'Bearer ' + session.access_token, 'Content-Type': 'application/json', 'Accept-Profile': SCHEMA, 'Content-Profile': SCHEMA, Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify([row]) })
+      .then(function (r) { if (!r.ok) return; var syn = read('pipmaths.synced') || {}, cur = read(KEY) || { profiles: [] };
+        cur.profiles.forEach(function (q) { if (q.id === p.id) syn[q.id] = body(q); }); write('pipmaths.synced', syn); })
+      .catch(function () {});
   }
   fromEmailLink();
   render();
