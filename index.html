@@ -172,12 +172,11 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
     Array.prototype.forEach.call(document.querySelectorAll('[data-signin]'), function (t) { t.onclick = function () { open('signin'); }; });
     // Account
     $('acct').innerHTML = email ? 'Family account<br><b>' + esc(email) + '</b><br><button class="out" id="out">Sign out</button><span class="warn" id="warn" hidden></span>'
-      : '<div class="btns"><button class="hbtn pri" id="sin">Sign in</button><button class="hbtn" id="sup">Create account</button></div>';
-    if (email) $('out').onclick = signOut; else { $('sin').onclick = function () { open('signin'); }; $('sup').onclick = function () { open('signup'); }; }
+      : '';
+    if (email) $('out').onclick = signOut;
     $('note').innerHTML = email
       ? '<span>☁️</span><span><b>Backed up.</b> Learners and progress sync across your devices. More account options are in Maths → Grown-ups.</span>'
-      : '<span>🔒</span><span><b>A free family account keeps everyone\'s progress safe.</b> One account for the whole family: add each learner, and their progress follows them on every device. <button class="out" id="sup2" style="min-height:0;margin:0">Create one now</button>.</span>';
-    if (!email) $('sup2').onclick = function () { open('signup'); };
+      : '<span>🔒</span><span><b>A free family account keeps everyone\'s progress safe.</b> One account for the whole family: add each learner, and their progress follows them on every device.</span>';
   }
   // Sign out, the same way Maths does it: only when everything is backed up (or on a second tap),
   // then end this device's session and clear this family's learners from the device.
