@@ -60,7 +60,7 @@ header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:s
 .hbtn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:12px;font-weight:700;font-size:15px;border:2px solid var(--line);background:var(--surface)}
 .hbtn.pri{background:var(--teal);border-color:var(--teal);color:#fff}
 .acct .btns{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:6px}
-.sheet{position:fixed;inset:0;background:#22303c66;display:grid;place-items:center;padding:16px;z-index:10;overflow:auto}
+.sheet{position:fixed;inset:0;background:#22303c66;display:grid;justify-items:center;align-items:center;align-items:safe center;padding:16px;z-index:10;overflow:auto}
 .sheet[hidden]{display:none}
 .card{width:min(440px,100%);background:var(--surface);border-radius:24px;padding:24px;box-shadow:0 20px 60px #22303c33;position:relative}
 .card h3{font-size:28px;margin-bottom:6px}
@@ -82,6 +82,29 @@ header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:s
 .opts button[aria-pressed=true]{border-color:var(--teal);background:#e9f7f4}
 .sws{display:flex;gap:10px;flex-wrap:wrap}.sws button{width:40px;height:40px;border-radius:50%;background:var(--c);border:3px solid #fff;box-shadow:0 0 0 2px var(--line)}
 .sws button[aria-pressed=true]{box-shadow:0 0 0 3px var(--c)}
+/* Grown-ups */
+.card.wide{width:min(760px,100%)}
+.gsec{border-top:2px solid var(--line);margin-top:18px;padding-top:14px}
+.gsec h4{margin:0 0 8px;font:700 15px/1.3 Inter,system-ui,sans-serif;color:var(--muted)}
+.lrow{display:flex;align-items:center;gap:12px;padding:6px 0}
+.lrow i{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;color:#fff;font-style:normal;font-family:"Baloo 2",system-ui;font-size:20px;flex:none}
+.lrow span{flex:1;font-weight:700}.lrow small{display:block;font-weight:500;color:var(--muted);font-size:13px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.hbtn.sm{min-height:40px;font-size:14px;padding:0 12px}
+.hbtn.danger{color:#b42318}
+.set{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:52px;font-weight:600}
+.card label.set{display:flex;margin:0;font-size:inherit;color:inherit;font-weight:600}
+.set select{min-height:44px;border:2px solid var(--line);border-radius:12px;padding:0 10px;font:inherit;background:#fff;color:var(--ink)}
+.tog{width:58px;height:34px;border-radius:99px;background:#ced4da;position:relative;flex:none}
+.tog::after{content:"";position:absolute;top:4px;left:4px;width:26px;height:26px;border-radius:50%;background:#fff;transition:left .15s}
+.tog[aria-pressed=true]{background:var(--teal)}.tog[aria-pressed=true]::after{left:28px}
+.gst{font-size:13px;color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.kpis div{background:#f8f9fa;border-radius:12px;padding:10px 12px}.kpis b{display:block;font:800 26px/1.1 "Baloo 2",system-ui}.kpis span{font-size:13px;color:var(--muted)}
+.admline{font-size:14px;margin:10px 0 0}.admline b{color:var(--ink)}
+.adm ol{margin:6px 0 0;padding-left:22px;font-size:14px}
+.gsum{display:flex;align-items:center;gap:10px;font:800 30px/1 "Baloo 2",system-ui}.gsum input{width:110px;font-size:24px;text-align:center}
+.acct .hbtn{margin-top:6px}
 footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}
 @media (max-width:520px){.acct{text-align:left;width:100%}.tile{min-height:0}}
 @media (prefers-reduced-motion:reduce){.tile.live{transition:none}.who.ask .chip[data-id]{animation:none}}
@@ -179,11 +202,11 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
       try { w.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { w.scrollIntoView(); }
     }; });
     // Account
-    $('acct').innerHTML = email ? 'Family account<br><b>' + esc(email) + '</b><br><button class="out" id="out">Sign out</button><span class="warn" id="warn" hidden></span>'
+    $('acct').innerHTML = email ? 'Family account<br><b>' + esc(email) + '</b><br><button class="hbtn sm" id="gro">Grown-ups</button> <button class="out" id="out">Sign out</button><span class="warn" id="warn" hidden></span>'
       : '';
-    if (email) $('out').onclick = signOut;
+    if (email) { $('out').onclick = signOut; $('gro').onclick = grownups; }
     $('note').innerHTML = email
-      ? '<span>☁️</span><span><b>Backed up.</b> Learners and progress sync across your devices. More account options are in Maths → Grown-ups.</span>'
+      ? '<span>☁️</span><span><b>Backed up.</b> Learners and progress sync across your devices. Learners, settings and the family account are in Grown-ups (top of the page).</span>'
       : '<span>🔒</span><span><b>A free family account keeps everyone\'s progress safe.</b> One account for the whole family: add each learner, and their progress follows them on every device.</span>';
   }
   // Sign out, the same way Maths does it: only when everything is backed up (or on a second tap),
@@ -192,11 +215,15 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
   function body(p) { var r = {}; for (var k in p) if (k !== 'id' && k !== 'name' && k !== 't') r[k] = p[k]; return JSON.stringify(r) + '|' + p.name; }
   function backedUp() { var syn = read('pipmaths.synced') || {}, s = read(KEY) || { profiles: [] }; for (var i = 0; i < s.profiles.length; i++) if (syn[s.profiles[i].id] !== body(s.profiles[i])) return false; return true; }
   var armed = false;
-  function signOut() {
+  async function signOut() {
     if (!demo && !backedUp() && !armed) {
-      armed = true; $('out').textContent = 'Sign out anyway';
-      var w = $('warn'); w.hidden = false; w.innerHTML = 'Some progress on this device is not backed up yet. <a href="maths/">Open Maths</a> to back it up first.';
-      return;
+      // Back it up first; only if that fails, warn (a second tap signs out anyway).
+      try { await syncAll(); } catch (e) {}
+      if (!backedUp()) {
+        armed = true; if ($('out')) $('out').textContent = 'Sign out anyway';
+        var w = $('warn'); if (w) { w.hidden = false; w.textContent = 'Some progress could not be backed up just now (check the internet connection). Tap again to sign out anyway.'; }
+        return;
+      }
     }
     var tok = session && session.access_token;
     if (!demo) {
@@ -204,7 +231,7 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
       var s = read(KEY) || {}; s.profiles = []; s.active = null; write(KEY, s);
       if (tok) try { fetch(SB + '/auth/v1/logout?scope=local', { method: 'POST', headers: { apikey: SBKEY, Authorization: 'Bearer ' + tok } }).catch(function () {}); } catch (e) {}
     }
-    session = null; state = { profiles: [], active: null, settings: state.settings || {} }; armed = false;
+    session = null; state = { profiles: [], active: null, settings: state.settings || {} }; armed = false; gateOk = false;
     render();
   }
   // ---------- Family account on the home page (same account, storage and rules as Maths) ----------
@@ -218,17 +245,43 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
     if (/rate limit|too many/i.test(m) || code === 429) return 'Too many tries. Please wait a few minutes.';
     return m || 'Something went wrong (' + code + ').';
   }
-  async function call(path, opt) {
+  async function call(path, opt, retried) {
     opt = opt || {};
     var h = { apikey: SBKEY, 'Content-Type': 'application/json' };
     if (path.indexOf('/rest/') === 0) { h['Accept-Profile'] = SCHEMA; h['Content-Profile'] = SCHEMA; }
     if (opt.token) h.Authorization = 'Bearer ' + opt.token;
+    if (opt.headers) for (var hk in opt.headers) h[hk] = opt.headers[hk];
     var r;
     try { r = await fetch(SB + path, { method: opt.method || 'GET', headers: h, body: opt.body === undefined ? undefined : JSON.stringify(opt.body) }); }
     catch (e) { throw new Error('No internet connection. Please try again.'); }
+    // The sign-in lasts an hour: renew it once and try again (Maths may already have renewed it).
+    if (r.status === 401 && opt.token && !retried && session && session.refresh_token) {
+      await renew(); var o2 = {}; for (var ok in opt) o2[ok] = opt[ok]; o2.token = session.access_token; return call(path, o2, true);
+    }
     var text = await r.text(), d = null; try { d = text ? JSON.parse(text) : null; } catch (e) { d = text; }
     if (!r.ok) throw new Error(niceError(d, r.status));
     return d;
+  }
+  var renewing = null;
+  function renew() {
+    if (renewing) return renewing;
+    renewing = (async function () {
+      var stored = read(SKEY);
+      if (stored && stored.refresh_token && stored.refresh_token !== session.refresh_token && stored.expires_at - 60 > Date.now() / 1000) { session = stored; return; }
+      var r; try { r = await fetch(SB + '/auth/v1/token?grant_type=refresh_token', { method: 'POST', headers: { apikey: SBKEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ refresh_token: session.refresh_token }) }); }
+      catch (e) { throw new Error('No internet connection. Please try again.'); }
+      var d = null; try { d = await r.json(); } catch (e) {}
+      if (r.ok && d && d.access_token) { keepSession(d, session.user); return; }
+      var again = read(SKEY); if (again && again.refresh_token !== session.refresh_token) { session = again; return; }
+      // The server refused: this device is signed out.
+      try { localStorage.removeItem(SKEY); localStorage.removeItem('pipmaths.synced'); } catch (e) {}
+      var s0 = read(KEY) || {}; s0.profiles = []; s0.active = null; write(KEY, s0);
+      session = null; state = { profiles: [], active: null, settings: state.settings || {} }; render();
+      open('signin', 'Your sign-in has ended. Please sign in again.');
+      throw new Error('Your sign-in has ended. Please sign in again.');
+    })();
+    renewing.then(function () { renewing = null; }, function () { renewing = null; });
+    return renewing;
   }
   function keepSession(d, user) {
     var sess = { access_token: d.access_token, refresh_token: d.refresh_token, expires_at: +d.expires_at || Math.floor(Date.now() / 1000) + (+d.expires_in || 3600), user: user || d.user };
@@ -302,14 +355,33 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
       '<button class="go" type="submit">Save password</button><div class="msg" id="msg"></div></form>'; },
     done: function () { return '<h3 id="st">All set</h3><div class="msg ok" id="msg"></div><button class="go" type="button" data-close>OK</button>'; },
     learner: function () {
-      var hasRegion = !!(state.settings && state.settings.region), rg = hasRegion ? state.settings.region : guessRegion();
+      var q = editId && find(editId), hasRegion = !!(state.settings && state.settings.region), rg = hasRegion ? state.settings.region : guessRegion();
       var ages = []; for (var a = 3; a <= 19; a++) ages.push(a);
-      return '<h3 id="st">Add a learner</h3><p class="sub">A name, a colour and an age. Lessons match the age.</p><form id="f">' +
-        (hasRegion ? '' : '<label>Country</label><div class="opts" id="rg">' + REGIONS.map(function (r) { return '<button type="button" data-r="' + r[0] + '" aria-pressed="' + (r[0] === rg) + '">' + r[1] + '</button>'; }).join('') + '</div>') +
-        '<label for="nm">Name</label><input id="nm" maxlength="20" autocomplete="off" placeholder="Type a name" required>' +
-        '<label>Colour</label><div class="sws" id="sw">' + COLORS.map(function (c, i) { return '<button type="button" style="--c:' + c + '" data-c="' + c + '" aria-label="Colour ' + (i + 1) + '" aria-pressed="' + (i === state.profiles.length % COLORS.length) + '"></button>'; }).join('') + '</div>' +
-        '<label>Age</label><div class="opts" id="ag">' + ages.map(function (a) { return '<button type="button" data-a="' + a + '" aria-pressed="false">' + (a === 19 ? 'Grown-up' : a) + '</button>'; }).join('') + '</div>' +
-        '<button class="go" type="submit" disabled>Add learner</button></form>';
+      var col = q ? q.color : COLORS[state.profiles.length % COLORS.length], age = q ? Math.min(q.age, 19) : null;
+      return '<h3 id="st">' + (q ? 'Edit ' + esc(q.name) : 'Add a learner') + '</h3><p class="sub">A name, a colour and an age. Lessons match the age.</p><form id="f">' +
+        (hasRegion || q ? '' : '<label>Country</label><div class="opts" id="rg">' + REGIONS.map(function (r) { return '<button type="button" data-r="' + r[0] + '" aria-pressed="' + (r[0] === rg) + '">' + r[1] + '</button>'; }).join('') + '</div>') +
+        '<label for="nm">Name</label><input id="nm" maxlength="20" autocomplete="off" placeholder="Type a name" value="' + (q ? esc(q.name) : '') + '" required>' +
+        '<label>Colour</label><div class="sws" id="sw">' + COLORS.map(function (c, i) { return '<button type="button" style="--c:' + c + '" data-c="' + c + '" aria-label="Colour ' + (i + 1) + '" aria-pressed="' + (c === col) + '"></button>'; }).join('') + '</div>' +
+        '<label>Age</label><div class="opts" id="ag">' + ages.map(function (a) { return '<button type="button" data-a="' + a + '" aria-pressed="' + (a === age) + '">' + (a === 19 ? 'Grown-up' : a) + '</button>'; }).join('') + '</div>' +
+        '<button class="go" type="submit"' + (q ? '' : ' disabled') + '>' + (q ? 'Save' : 'Add learner') + '</button>' +
+        (q ? '<div class="links"><button type="button" id="back">Back to Grown-ups</button><button type="button" id="rm" style="color:#b42318">Remove ' + esc(q.name) + '</button></div>' : '') + '</form>';
+    },
+    gate: function () { return '<h3 id="st">For grown-ups</h3><p class="sub">Please answer to continue.</p><form id="f"><div class="gsum"><span>' + gateQ[0] + ' × ' + gateQ[1] + ' =</span><input id="ga" inputmode="numeric" autocomplete="off" aria-label="Answer"></div>' +
+      '<button class="go" type="submit">OK</button><div class="msg" id="msg"></div></form>'; },
+    grown: function () {
+      var st = state.settings || {}, rg = st.region || guessRegion();
+      return '<h3 id="st">Grown-ups</h3>' +
+        '<div class="gsec" style="border:0;margin-top:6px;padding-top:0"><h4>Learners</h4>' + state.profiles.map(function (q) {
+          return '<div class="lrow"><i style="background:' + esc(q.color || '#2f9e8f') + '">' + esc((q.name || '?').charAt(0).toUpperCase()) + '</i><span>' + esc(q.name) + '<small>' + (q.age > 18 ? 'Grown-up' : 'Age ' + esc(q.age)) + '</small></span><button type="button" class="hbtn sm" data-edit="' + esc(q.id) + '">Edit</button></div>';
+        }).join('') + '<div class="btnrow"><button type="button" class="hbtn sm" id="gadd">+ Add a learner</button></div></div>' +
+        '<div class="gsec"><h4>Settings for the whole family</h4>' +
+        '<label class="set"><span>Country</span><select id="grg">' + REGIONS.map(function (r) { return '<option value="' + r[0] + '"' + (r[0] === rg ? ' selected' : '') + '>' + r[1] + '</option>'; }).join('') + '</select></label>' +
+        '<div class="set"><span>Sound effects</span><button type="button" class="tog" id="gsnd" aria-label="Sound effects" aria-pressed="' + (st.sound !== false) + '"></button></div>' +
+        '<div class="set"><span>Spoken prompts</span><button type="button" class="tog" id="gvoc" aria-label="Spoken prompts" aria-pressed="' + (st.voice !== false) + '"></button></div></div>' +
+        '<div class="gsec"><h4>Family account</h4><div>Signed in as <b>' + esc(session && session.user && session.user.email || '') + '</b></div><div class="gst" id="gst">' + esc(syncLine) + '</div>' +
+        '<div class="btnrow"><button type="button" class="hbtn sm" id="gsync">Sync now</button><button type="button" class="hbtn sm" id="gout">Sign out</button><a class="hbtn sm" href="maths/privacy.html">Privacy</a><button type="button" class="hbtn sm danger" id="gdel">Delete account</button></div></div>' +
+        '<div class="gsec"><h4>Subjects</h4><div class="btnrow"><a class="hbtn sm" href="maths/#settings">Maths settings: dashboard, weekly report →</a></div></div>' +
+        '<div class="gsec adm" id="gadm" hidden></div>';
     }
   };
   function close() { $('sheet').hidden = true; }
@@ -320,13 +392,16 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
   function busy(on, label) { var b = document.querySelector('#f .go'); if (b) { b.disabled = on; if (label) b.textContent = label; } }
   function open(view, note) {
     $('sc').innerHTML = VIEWS[view](); $('sheet').hidden = false;
+    $('sheet').querySelector('.card').classList.toggle('wide', view === 'grown');
     Array.prototype.forEach.call($('sc').querySelectorAll('[data-v]'), function (b) { b.onclick = function () { open(b.getAttribute('data-v')); }; });
     Array.prototype.forEach.call($('sc').querySelectorAll('[data-show]'), function (b) { b.onclick = function () { var i = $(b.getAttribute('data-show')); i.type = i.type === 'password' ? 'text' : 'password'; b.textContent = i.type === 'password' ? 'Show' : 'Hide'; }; });
     Array.prototype.forEach.call($('sc').querySelectorAll('[data-close]'), function (b) { b.onclick = close; });
     if (note) say(note, view === 'done');
     var first = $('sc').querySelector('input:not([hidden])'); if (first) setTimeout(function () { try { first.focus(); } catch (e) {} }, 50);
+    if (view === 'grown') return grownForm();
     var f = $('f'); if (!f) return;
     if (view === 'learner') return learnerForm(f);
+    if (view === 'gate') { f.onsubmit = function (e) { e.preventDefault(); if (+$('ga').value === gateQ[0] * gateQ[1]) { gateOk = true; open('grown'); } else { newGate(); open('gate', 'Not quite. Try this one.'); } }; return; }
     f.onsubmit = async function (e) {
       e.preventDefault(); say('');
       var em = $('em') && $('em').value.trim(), pw = $('pw') && $('pw').value, label = document.querySelector('#f .go').textContent;
@@ -344,42 +419,135 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
       busy(false, label);
     };
   }
+  function find(id) { for (var i = 0; i < state.profiles.length; i++) if (state.profiles[i].id === id) return state.profiles[i]; return null; }
   function learnerForm(f) {
     if (!session) { open('signin'); return; }
-    var d = { name: '', age: null, color: COLORS[state.profiles.length % COLORS.length], region: (state.settings && state.settings.region) || guessRegion() };
+    var q = editId && find(editId), fromGrown = !!editId || addFromGrown;
+    var d = { name: q ? q.name : '', age: q ? q.age : null, color: q ? q.color : COLORS[state.profiles.length % COLORS.length], region: (state.settings && state.settings.region) || guessRegion() };
     var go = f.querySelector('.go'), check = function () { go.disabled = !(d.name.trim() && d.age); };
     function pick(box, attr, set) { Array.prototype.forEach.call(box.querySelectorAll('button'), function (b) { b.onclick = function () { set(b.getAttribute(attr)); Array.prototype.forEach.call(box.querySelectorAll('button'), function (x) { x.setAttribute('aria-pressed', String(x === b)); }); check(); }; }); }
     if ($('rg')) pick($('rg'), 'data-r', function (v) { d.region = v; });
     pick($('sw'), 'data-c', function (v) { d.color = v; });
     pick($('ag'), 'data-a', function (v) { d.age = +v; });
     $('nm').oninput = function () { d.name = this.value; check(); };
+    var done = function () { editId = null; addFromGrown = false; if (fromGrown) open('grown'); else close(); render(); };
+    if ($('back')) $('back').onclick = function () { editId = null; open('grown'); };
+    if ($('rm')) $('rm').onclick = function () {
+      var b = $('rm'); if (!b.getAttribute('data-arm')) { b.setAttribute('data-arm', '1'); b.textContent = 'Tap again to remove ' + q.name + ' and their progress'; return; }
+      var s = read(KEY) || state; s.profiles = (s.profiles || []).filter(function (x) { return x.id !== q.id; });
+      if (s.active === q.id) s.active = s.profiles.length === 1 ? s.profiles[0].id : null;
+      write(KEY, s); state = s;
+      if (session && session.user && session.user.id) call('/rest/v1/learners?on_conflict=family_id,id', { method: 'POST', token: session.access_token, headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: [{ family_id: session.user.id, id: q.id, name: '-', data: {}, deleted: true }] })
+        .then(function () { var syn = read('pipmaths.synced') || {}; delete syn[q.id]; write('pipmaths.synced', syn); }).catch(function () {});
+      done();
+    };
     f.onsubmit = function (e) {
       e.preventDefault(); if (!(d.name.trim() && d.age)) return;
       var s = read(KEY) || { profiles: [], active: null, settings: { sound: true, voice: true } };
       s.profiles = s.profiles || []; s.settings = s.settings || { sound: true, voice: true };
-      if (!s.settings.region) s.settings.region = d.region;
-      // Same shape as a learner made in Maths (store.js addProfile). "t" marks it as changed, so Maths backs it up.
-      var p = { id: 'p' + Date.now().toString(36), name: d.name.trim().slice(0, 20), age: d.age, lang: 'en', color: d.color, modeOverride: null, created: Date.now(), progress: {}, bests: {}, coins: 0, stickers: [], t: Date.now() };
-      s.profiles.push(p); s.active = p.id; write(KEY, s); state = s; close(); render();
+      var p;
+      if (q) {
+        for (var i = 0; i < s.profiles.length; i++) if (s.profiles[i].id === q.id) p = s.profiles[i];
+        if (!p) { done(); return; }
+        p.name = d.name.trim().slice(0, 20); p.age = d.age; p.color = d.color; p.t = Date.now();
+      } else {
+        if (!s.settings.region) s.settings.region = d.region;
+        // Same shape as a learner made in Maths (store.js addProfile). "t" marks it as changed, so Maths backs it up.
+        p = { id: 'p' + Date.now().toString(36), name: d.name.trim().slice(0, 20), age: d.age, lang: 'en', color: d.color, modeOverride: null, created: Date.now(), progress: {}, bests: {}, coins: 0, stickers: [], t: Date.now() };
+        s.profiles.push(p); s.active = p.id;
+      }
+      write(KEY, s); state = s; done();
       backup(p);
     };
   }
   // Back up a new learner straight away (same row format as Maths: cloud.js toRow), so it is safe in the account.
-  function backup(p) {
-    if (!session || !session.user || !session.user.id) return;
+  function row(p) {
     var data = {}; for (var k in p) if (k !== 'id' && k !== 'name') data[k] = p[k];
     data.mode = p.modeOverride || (p.age <= 7 ? 'little' : p.age <= 13 ? 'explore' : p.age <= 18 ? 'achieve' : 'adult');
-    var row = { family_id: session.user.id, id: p.id, name: String(p.name).slice(0, 40), data: data, deleted: false };
-    fetch(SB + '/rest/v1/learners?on_conflict=family_id,id', { method: 'POST', headers: { apikey: SBKEY, Authorization: 'Bearer ' + session.access_token, 'Content-Type': 'application/json', 'Accept-Profile': SCHEMA, 'Content-Profile': SCHEMA, Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify([row]) })
-      .then(function (r) { if (!r.ok) return; var syn = read('pipmaths.synced') || {}, cur = read(KEY) || { profiles: [] };
+    return { family_id: session.user.id, id: p.id, name: String(p.name).slice(0, 40), data: data, deleted: false };
+  }
+  var UPSERT = { Prefer: 'resolution=merge-duplicates,return=minimal' };
+  function backup(p) {
+    if (!session || !session.user || !session.user.id) return;
+    call('/rest/v1/learners?on_conflict=family_id,id', { method: 'POST', token: session.access_token, headers: UPSERT, body: [row(p)] })
+      .then(function () { var syn = read('pipmaths.synced') || {}, cur = read(KEY) || { profiles: [] };
         cur.profiles.forEach(function (q) { if (q.id === p.id) syn[q.id] = body(q); }); write('pipmaths.synced', syn); })
       .catch(function () {});
+  }
+  function pushSettings() {
+    if (!session || !session.user || !session.user.id) return Promise.resolve();
+    var st = state.settings || {};
+    return call('/rest/v1/families?on_conflict=id', { method: 'POST', token: session.access_token, headers: UPSERT, body: [{ id: session.user.id, settings: { region: st.region, sound: st.sound, voice: st.voice } }] });
+  }
+  // Sync now: send anything not yet backed up, then bring in changes from other devices.
+  var syncLine = 'Progress saves automatically.';
+  async function syncAll() {
+    var s = read(KEY) || { profiles: [] }, syn = read('pipmaths.synced') || {};
+    var out = (s.profiles || []).filter(function (p) { return syn[p.id] !== body(p); });
+    if (out.length) await call('/rest/v1/learners?on_conflict=family_id,id', { method: 'POST', token: session.access_token, headers: UPSERT, body: out.map(row) });
+    out.forEach(function (p) { syn[p.id] = body(p); }); write('pipmaths.synced', syn);
+    state = read(KEY) || state; await pushSettings(); await pull();
+  }
+
+  // ---------- Grown-ups (behind a quick sum, like Maths) ----------
+  var editId = null, addFromGrown = false, gateOk = false, gateQ = [7, 8];
+  function newGate() { gateQ = [3 + Math.floor(Math.random() * 7), 6 + Math.floor(Math.random() * 7)]; }
+  function grownups() {
+    if (!session) { open('signin'); return; }
+    var p = learner();
+    if (gateOk || demo || (p && p.age > 18)) { open('grown'); return; }
+    newGate(); open('gate');
+  }
+  function setting(k, v) {
+    var s = read(KEY) || state; s.settings = s.settings || {}; s.settings[k] = v; write(KEY, s); state = s;
+    pushSettings().catch(function () {});
+  }
+  function grownForm() {
+    Array.prototype.forEach.call($('sc').querySelectorAll('[data-edit]'), function (b) { b.onclick = function () { editId = b.getAttribute('data-edit'); open('learner'); }; });
+    $('gadd').onclick = function () { editId = null; addFromGrown = true; open('learner'); };
+    $('grg').onchange = function () { setting('region', this.value); render(); };
+    $('gsnd').onclick = function () { var on = this.getAttribute('aria-pressed') !== 'true'; this.setAttribute('aria-pressed', on); setting('sound', on); };
+    $('gvoc').onclick = function () { var on = this.getAttribute('aria-pressed') !== 'true'; this.setAttribute('aria-pressed', on); setting('voice', on); };
+    $('gsync').onclick = async function () {
+      var g = $('gst'); g.textContent = 'Saving…';
+      try { await syncAll(); syncLine = 'All saved at ' + new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); render(); open('grown'); }
+      catch (e) { if ($('gst')) $('gst').textContent = e.message; }
+    };
+    $('gout').onclick = function () { close(); signOut(); if (session) { $('acct').scrollIntoView(); } };
+    $('gdel').onclick = async function () {
+      var b = this; if (!b.getAttribute('data-arm')) { b.setAttribute('data-arm', '1'); b.textContent = 'Tap again: delete the account and all saved progress'; return; }
+      b.disabled = true;
+      try { await call('/rest/v1/rpc/delete_my_account', { method: 'POST', token: session.access_token, body: {} }); armed = true; close(); signOut(); open('done', 'The family account and all its saved progress have been deleted.'); }
+      catch (e) { b.disabled = false; $('gst').textContent = e.message; }
+    };
+    admin();
+  }
+  // ---------- Admin: only for accounts on the server's admins list ----------
+  var REGION_NAMES = { india: 'India', us: 'USA', canada: 'Canada', uk: 'UK' }, MODE_NAMES = { little: 'Little Learners', explore: 'Explorers', achieve: 'Achievers', adult: 'Adults' };
+  async function admin() {
+    var box = $('gadm'); if (!box || !session) return;
+    var yes = false; try { yes = await call('/rest/v1/rpc/is_admin', { method: 'POST', token: session.access_token, body: {} }); } catch (e) {}
+    if (yes !== true || !$('gadm')) return;
+    box = $('gadm'); box.hidden = false; box.innerHTML = '<h4>Admin (only you see this)</h4><div class="gst">Loading…</div>';
+    try {
+      var o = await call('/rest/v1/rpc/admin_overview', { method: 'POST', token: session.access_token, body: {} });
+      var titles = {}; try { var sk = await (await fetch('maths/content/skills.json')).json(); (sk.skills || []).forEach(function (x) { titles[x.id] = typeof x.title === 'object' ? x.title.en : x.title; }); } catch (e) {}
+      var list = function (obj, names) { return Object.keys(obj || {}).sort(function (a, b) { return obj[b] - obj[a]; }).map(function (k) { return esc(names[k] || (k === 'unknown' ? '–' : k)) + ' ' + esc(obj[k]); }).join(' · ') || '–'; };
+      var top = (o.topLessons || []).map(function (x) { return '<li>' + esc(titles[x.id] || x.id) + ' <span class="gst">' + esc(x.learners) + '</span></li>'; }).join('');
+      if (!$('gadm')) return;
+      box.innerHTML = '<h4>Admin (only you see this)</h4><div class="kpis"><div><b>' + esc(o.families) + '</b><span>families</span></div><div><b>' + esc(o.learners) + '</b><span>learners</span></div><div><b>' + esc(o.active7) + '</b><span>active this week</span></div><div><b>' + esc(o.newFamilies30) + '</b><span>new families (30 days)</span></div></div>' +
+        '<p class="admline"><b>Countries:</b> ' + list(o.byCountry, REGION_NAMES) + '<br><b>Age groups:</b> ' + list(o.byMode, MODE_NAMES) + '</p>' +
+        (top ? '<p class="admline"><b>Most practised lessons</b></p><ol>' + top + '</ol>' : '') +
+        '<div class="btnrow"><a class="hbtn sm" href="maths/#admin">Maths: every lesson in every mode →</a></div>';
+    } catch (e) { if ($('gadm')) box.innerHTML = '<h4>Admin</h4><div class="gst">' + esc(e.message) + '</div>'; }
   }
   // Maths sends visitors here to sign in (#signin), or after their sign-in ended (#signin-again).
   // After signing in they go straight back to Maths (if the family has learners already).
   var backTo = null;
   function fromMaths() {
-    var hs = location.hash; if (hs !== '#signin' && hs !== '#signin-again') return;
+    var hs = location.hash;
+    if (hs === '#grownups') { history.replaceState(null, '', location.pathname + location.search); if (session && session.access_token) grownups(); else open('signin'); return; }
+    if (hs !== '#signin' && hs !== '#signin-again') return;
     history.replaceState(null, '', location.pathname + location.search);
     if (session && session.access_token) return;
     backTo = 'maths/';
