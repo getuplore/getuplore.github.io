@@ -35,6 +35,8 @@ header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:s
 .hero p{margin:6px 0 0;color:var(--muted);max-width:40em}
 .who{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center}
 .who .lab{font-weight:700;margin-right:4px}
+.who.ask .lab{color:#b54708}.who.ask .chip[data-id]{animation:nudge .5s 2}
+@keyframes nudge{50%{transform:translateY(-4px);box-shadow:0 0 0 3px #ffd16699}}
 .chip{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:6px 16px 6px 6px;border-radius:999px;background:var(--surface);border:2px solid var(--line);font-weight:700}
 .chip i{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;color:#fff;font-style:normal;font-family:"Baloo 2",system-ui;font-size:20px}
 .chip[aria-pressed=true]{border-color:var(--teal);box-shadow:0 0 0 3px #2f9e8f33}
@@ -82,7 +84,7 @@ header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:s
 .sws button[aria-pressed=true]{box-shadow:0 0 0 3px var(--c)}
 footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}
 @media (max-width:520px){.acct{text-align:left;width:100%}.tile{min-height:0}}
-@media (prefers-reduced-motion:reduce){.tile.live{transition:none}}
+@media (prefers-reduced-motion:reduce){.tile.live{transition:none}.who.ask .chip[data-id]{animation:none}}
 </style>
 </head>
 <body>
@@ -153,7 +155,7 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
     var addBtn = '<button class="chip add" id="addl">+ Add a learner</button>';
     if (!email) who.innerHTML = '<button class="hbtn pri" id="sin2">Sign in to start</button><button class="hbtn" id="sup3">Create a free family account</button>';
     else if (!state.profiles.length) who.innerHTML = '<span class="lab">No learners yet.</span> ' + addBtn;
-    else who.innerHTML = '<span class="lab">Who is learning?</span>' + state.profiles.map(function (q) {
+    else who.innerHTML = '<span class="lab">' + (p ? 'Who is learning?' : 'Who is learning? Tap a name.') + '</span>' + state.profiles.map(function (q) {
       return '<button class="chip" data-id="' + esc(q.id) + '" aria-pressed="' + (q.id === state.active) + '"><i style="background:' + esc(q.color || '#2f9e8f') + '">' + esc((q.name || '?').charAt(0).toUpperCase()) + '</i><span>' + esc(q.name) + '<small>' + (q.age > 18 ? 'grown-up' : 'age ' + esc(q.age)) + '</small></span></button>';
     }).join('') + addBtn;
     if (email) $('addl').onclick = function () { open('learner'); };
@@ -166,10 +168,16 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
     $('subjects').innerHTML = SUBJECTS.map(function (s) {
       var prog = s.id === 'maths' && p ? '<div class="prog">' + esc(p.name) + ': ' + st.tried + (st.tried === 1 ? ' lesson' : ' lessons') + ' practised · ' + st.mastered + ' mastered<div class="bar"><i style="width:' + Math.min(100, Math.round(st.tried / MATHS_LESSONS * 100)) + '%"></i></div></div>' : '';
       var inner = '<div class="ic">' + s.icon + '</div><h3>' + s.name + '</h3><p>' + s.text + '</p>' + prog + (s.live ? '<span class="go">Open ' + s.name + ' →</span>' : '<span class="soon">' + s.soon + '</span>');
+      // Uplore is where the learner is chosen: Maths opens straight into them.
+      if (s.live && signed && state.profiles.length && !p) return '<button class="tile live" style="--c:' + s.c + ';text-align:left" data-pick>' + inner.replace('Open ' + s.name + ' →', 'Choose who is learning first') + '</button>';
       if (s.live && !signed) return '<button class="tile live" style="--c:' + s.c + ';text-align:left" data-signin>' + inner.replace('Open ' + s.name + ' →', 'Sign in to open ' + s.name) + '</button>';
       return s.live ? '<a class="tile live" style="--c:' + s.c + '" href="' + s.href + '">' + inner + '</a>' : '<div class="tile" style="--c:' + s.c + '" aria-disabled="true">' + inner + '</div>';
     }).join('');
     Array.prototype.forEach.call(document.querySelectorAll('[data-signin]'), function (t) { t.onclick = function () { open('signin'); }; });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-pick]'), function (t) { t.onclick = function () {
+      var w = $('who'); w.classList.remove('ask'); void w.offsetWidth; w.classList.add('ask');
+      try { w.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { w.scrollIntoView(); }
+    }; });
     // Account
     $('acct').innerHTML = email ? 'Family account<br><b>' + esc(email) + '</b><br><button class="out" id="out">Sign out</button><span class="warn" id="warn" hidden></span>'
       : '';
@@ -324,7 +332,7 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
       var em = $('em') && $('em').value.trim(), pw = $('pw') && $('pw').value, label = document.querySelector('#f .go').textContent;
       busy(true, 'Please wait…');
       try {
-        if (view === 'signin') { await afterSignIn(await call('/auth/v1/token?grant_type=password', { method: 'POST', body: { email: em, password: pw } })); close(); render(); if (backTo && state.profiles.length) { location.href = backTo; return; } }
+        if (view === 'signin') { await afterSignIn(await call('/auth/v1/token?grant_type=password', { method: 'POST', body: { email: em, password: pw } })); close(); render(); if (backTo && state.profiles.length && learner()) { location.href = backTo; return; } }
         else if (view === 'signup') {
           var d = await call('/auth/v1/signup?redirect_to=' + encodeURIComponent(HOME), { method: 'POST', body: { email: em, password: pw } });
           if (d && d.access_token) { await afterSignIn(d); close(); render(); }
