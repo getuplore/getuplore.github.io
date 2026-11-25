@@ -57,7 +57,7 @@ h3{font-size:15px;color:var(--muted);margin:0 0 8px}
   // Each subject keeps its own tables (schema); add a line here when a subject gets an admin overview.
   var SUBJECTS = [
     { id: 'maths', name: 'Maths', c: 'var(--maths)', schema: 'Math_schema', skills: '../maths/content/skills.json', lessons: '../maths/#admin' },
-    { id: 'english', name: 'English', c: 'var(--english)' },
+    { id: 'english', name: 'English', c: 'var(--english)', schema: 'English_schema', skills: '../english/content/skills.json', lessons: '../english/' },
     { id: 'computers', name: 'Computers', c: 'var(--computers)' },
     { id: 'french', name: 'French', c: 'var(--french)' }
   ];
@@ -106,7 +106,7 @@ h3{font-size:15px;color:var(--muted);margin:0 0 8px}
       $('main').innerHTML = tabs() + '<section class="panel" style="--c:' + s.c + '"><h2>' + s.name + '</h2>' +
         '<div class="kpis"><div><b>' + esc(o.families) + '</b><span>families</span></div><div><b>' + esc(o.learners) + '</b><span>learners</span></div><div><b>' + esc(o.active7) + '</b><span>active this week</span></div><div><b>' + esc(o.newFamilies30) + '</b><span>new families (30 days)</span></div></div>' +
         '<div class="cols"><div><h3>Countries</h3>' + bars(o.byCountry, REGION) + '</div><div><h3>Age groups</h3>' + bars(o.byMode, MODE) + '</div><div><h3>Most practised lessons (learners)</h3>' + bars(top, names) + '</div></div>' +
-        '<div class="row"><a class="btn pri" href="' + s.lessons + '">Every lesson in every mode →</a><a class="btn" href="../maths/diag.html">Device check</a></div>' +
+        '<div class="row"><a class="btn pri" href="' + s.lessons + '">' + (s.id === 'maths' ? 'Every lesson in every mode →' : 'Open ' + s.name + ' →') + '</a><a class="btn" href="../maths/diag.html">Device check</a></div>' +
         '<p class="note">Totals only: no names or emails.</p></section>';
       wire();
     } catch (e) { stop(esc(e.message === 'signin' ? 'Your sign-in has ended.' : e.message) + ' <a href="../#signin">Sign in</a>'); }

@@ -136,7 +136,7 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
 (function () {
   'use strict';
   var KEY = 'pipmaths.v1', SKEY = 'pipmaths.session';
-  var MATHS_LESSONS = 373;
+  var MATHS_LESSONS = 373, ENGLISH_LESSONS = 33, EKEY = 'uplore.english.v1';
   function read(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
   function write(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -151,13 +151,14 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
   var session = read(SKEY);
 
   function learner() { for (var i = 0; i < state.profiles.length; i++) if (state.profiles[i].id === state.active) return state.profiles[i]; return null; }
-  function stats(p) { var tried = 0, mastered = 0, pr = (p && p.progress) || {}; for (var k in pr) { if (pr[k] && pr[k].a && pr[k].a.length) tried++; if (pr[k] && pr[k].mastered) mastered++; } return { tried: tried, mastered: mastered }; }
+  function stats(p, subject) { var tried = 0, mastered = 0, pr = (p && p.progress) || {};
+    if (subject === 'english') { var en = read(EKEY) || {}; pr = (p && en[p.id] && en[p.id].progress) || {}; } for (var k in pr) { if (pr[k] && pr[k].a && pr[k].a.length) tried++; if (pr[k] && pr[k].mastered) mastered++; } return { tried: tried, mastered: mastered }; }
 
   var SUBJECTS = [
-    { id: 'maths', name: 'Maths', live: true, href: 'maths/', c: 'var(--maths)', icon: '<img src="maths/img/icon-64.png" alt="" onerror="this.replaceWith(document.createTextNode(\'🔢\'))">',
+    { id: 'maths', name: 'Maths', live: true, href: 'maths/', total: MATHS_LESSONS, c: 'var(--maths)', icon: '<img src="maths/img/icon-64.png" alt="" onerror="this.replaceWith(document.createTextNode(\'🔢\'))">',
       text: 'Pip Maths: JK to grown-ups. School maths, tables, tricks, Vedic maths, logic, exam papers.' },
-    { id: 'english', name: 'English', c: 'var(--english)', icon: '📖', soon: 'Being built now',
-      text: 'Letter sounds, reading, spelling, grammar, vocabulary and writing. For first and second-language learners.' },
+    { id: 'english', name: 'English', live: true, href: 'english/', c: 'var(--english)', icon: '📖', total: ENGLISH_LESSONS,
+      text: 'Uplore English: letter sounds, reading, tricky words, rhymes, picture words and stories. Spelling, grammar and writing are coming.' },
     { id: 'computers', name: 'Computers', c: 'var(--computers)', icon: '💻', soon: 'Coming later',
       text: 'How computers think: logic, programming, databases, security and AI.' },
     { id: 'french', name: 'French', c: 'var(--french)', icon: '🥐', soon: 'Coming later',
@@ -184,9 +185,9 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
       b.onclick = function () { state.active = b.getAttribute('data-id'); if (!demo) { var s = read(KEY) || state; s.active = state.active; write(KEY, s); } render(); };
     });
     // Subject tiles
-    var st = stats(p);
     $('subjects').innerHTML = SUBJECTS.map(function (s) {
-      var prog = s.id === 'maths' && p ? '<div class="prog">' + esc(p.name) + ': ' + st.tried + (st.tried === 1 ? ' lesson' : ' lessons') + ' practised · ' + st.mastered + ' mastered<div class="bar"><i style="width:' + Math.min(100, Math.round(st.tried / MATHS_LESSONS * 100)) + '%"></i></div></div>' : '';
+      var st = stats(p, s.id);
+      var prog = s.live && p ? '<div class="prog">' + esc(p.name) + ': ' + st.tried + (st.tried === 1 ? ' lesson' : ' lessons') + ' practised · ' + st.mastered + ' mastered<div class="bar"><i style="width:' + Math.min(100, Math.round(st.tried / s.total * 100)) + '%"></i></div></div>' : '';
       var inner = '<div class="ic">' + s.icon + '</div><h3>' + s.name + '</h3><p>' + s.text + '</p>' + prog + (s.live ? '<span class="go">Open ' + s.name + ' →</span>' : '<span class="soon">' + s.soon + '</span>');
       // Uplore is where the learner is chosen: Maths opens straight into them.
       if (s.live && signed && state.profiles.length && !p) return '<button class="tile live" style="--c:' + s.c + ';text-align:left" data-pick>' + inner.replace('Open ' + s.name + ' →', 'Choose who is learning first') + '</button>';
@@ -224,7 +225,7 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
     }
     var tok = session && session.access_token;
     if (!demo) {
-      try { localStorage.removeItem(SKEY); localStorage.removeItem('pipmaths.synced'); } catch (e) {}
+      try { localStorage.removeItem(SKEY); localStorage.removeItem('pipmaths.synced'); localStorage.removeItem(EKEY); localStorage.removeItem('uplore.english.synced'); } catch (e) {}
       var s = read(KEY) || {}; s.profiles = []; s.active = null; write(KEY, s);
       if (tok) try { fetch(SB + '/auth/v1/logout?scope=local', { method: 'POST', headers: { apikey: SBKEY, Authorization: 'Bearer ' + tok } }).catch(function () {}); } catch (e) {}
     }
@@ -377,7 +378,7 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
         '<div class="set"><span>Spoken prompts</span><button type="button" class="tog" id="gvoc" aria-label="Spoken prompts" aria-pressed="' + (st.voice !== false) + '"></button></div></div>' +
         '<div class="gsec"><h4>Family account</h4><div>Signed in as <b>' + esc(session && session.user && session.user.email || '') + '</b></div><div class="gst" id="gst">' + esc(syncLine) + '</div>' +
         '<div class="btnrow"><button type="button" class="hbtn sm" id="gsync">Sync now</button><button type="button" class="hbtn sm" id="gout">Sign out</button><a class="hbtn sm" href="maths/privacy.html">Privacy</a><button type="button" class="hbtn sm danger" id="gdel">Delete account</button></div></div>' +
-        '<div class="gsec"><h4>Subjects</h4><div class="btnrow"><a class="hbtn sm" href="maths/#settings">Maths settings: dashboard, weekly report →</a></div></div>' +
+        '<div class="gsec"><h4>Subjects</h4><div class="btnrow"><a class="hbtn sm" href="maths/#settings">Maths settings: dashboard, weekly report →</a><a class="hbtn sm" href="english/#settings">English settings →</a></div></div>' +
         '<div class="gsec adm" id="gadm" hidden></div>';
     }
   };
@@ -436,6 +437,8 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
       write(KEY, s); state = s;
       if (session && session.user && session.user.id) call('/rest/v1/learners?on_conflict=family_id,id', { method: 'POST', token: session.access_token, headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: [{ family_id: session.user.id, id: q.id, name: '-', data: {}, deleted: true }] })
         .then(function () { var syn = read('pipmaths.synced') || {}; delete syn[q.id]; write('pipmaths.synced', syn); }).catch(function () {});
+      var en = read(EKEY); if (en && en[q.id]) { delete en[q.id]; write(EKEY, en); }
+      if (session && session.user) call('/rest/v1/progress?learner_id=eq.' + encodeURIComponent(q.id), { method: 'DELETE', token: session.access_token, headers: { 'Accept-Profile': 'English_schema', 'Content-Profile': 'English_schema' } }).catch(function () {});
       done();
     };
     f.onsubmit = function (e) {
@@ -542,7 +545,7 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
   fromEmailLink();
   render();
   fromMaths();
-  window.addEventListener('storage', function (e) { if (e.key === KEY || e.key === SKEY) { state = read(KEY) || state; session = read(SKEY); render(); } });
+  window.addEventListener('storage', function (e) { if (e.key === KEY || e.key === SKEY || e.key === EKEY) { state = read(KEY) || state; session = read(SKEY); render(); } });
 })();
 </script>
 </body>
