@@ -136,7 +136,7 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
 (function () {
   'use strict';
   var KEY = 'pipmaths.v1', SKEY = 'pipmaths.session';
-  var MATHS_LESSONS = 373, ENGLISH_LESSONS = 33, EKEY = 'uplore.english.v1';
+  var MATHS_LESSONS = 373, ENGLISH_LESSONS = 81, EKEY = 'uplore.english.v1';
   function read(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
   function write(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -158,7 +158,7 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
     { id: 'maths', name: 'Maths', live: true, href: 'maths/', total: MATHS_LESSONS, c: 'var(--maths)', icon: '<img src="maths/img/icon-64.png" alt="" onerror="this.replaceWith(document.createTextNode(\'🔢\'))">',
       text: 'Pip Maths: JK to grown-ups. School maths, tables, tricks, Vedic maths, logic, exam papers.' },
     { id: 'english', name: 'English', live: true, href: 'english/', c: 'var(--english)', icon: '<img src="english/img/icon-64.png" alt="" onerror="this.replaceWith(document.createTextNode(\'📖\'))">', total: ENGLISH_LESSONS,
-      text: 'Uplore English: letter sounds, reading, tricky words, rhymes, picture words and stories. Spelling, grammar and writing are coming.' },
+      text: 'Uplore English: phonics and stories for little ones; spelling, grammar, vocabulary, reading and sentences for Grades 2–8.' },
     { id: 'computers', name: 'Computers', c: 'var(--computers)', icon: '💻', soon: 'Coming later',
       text: 'How computers think: logic, programming, databases, security and AI.' },
     { id: 'french', name: 'French', c: 'var(--french)', icon: '🥐', soon: 'Coming later',
