@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Uplore</title>
+<meta name="description" content="Uplore: Maths, English and more for the whole family, from JK to grown-ups.">
+<meta name="theme-color" content="#2f9e8f">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='6' y='38' width='14' height='20' rx='4' fill='%239fd8cf'/%3E%3Crect x='25' y='27' width='14' height='31' rx='4' fill='%235cbcae'/%3E%3Crect x='44' y='15' width='14' height='43' rx='4' fill='%232f9e8f'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Uplore home: one place for every subject. Warm cream, a calm teal, and each subject's own colour. */
+:root{--bg:#fdf8ef;--surface:#fff;--ink:#22303c;--muted:#5d6b78;--line:#22303c1a;--teal:#2f9e8f;--teal-ink:#fff;--brown:#b07a45;--rad:22px;--shadow:0 6px 0 #22303c14;
+  --maths:#ff6b4a;--english:#4c6ef5;--computers:#2f9e44;--french:#d6336c}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:radial-gradient(70% 50% at 100% 0%,#ffe8c2 0,transparent 70%),radial-gradient(60% 40% at 0% 100%,#d3f0ea 0,transparent 70%),var(--bg);background-attachment:fixed;color:var(--ink);font:500 17px/1.5 Inter,system-ui,sans-serif;min-height:100vh}
+a{color:inherit}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
+:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
+h1,h2,h3{font-family:"Baloo 2",system-ui,sans-serif;line-height:1.05;margin:0}
+.wrap{max-width:1040px;margin:0 auto;padding:clamp(16px,4vw,40px)}
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.brand svg{width:56px;height:56px;flex:none}
+.brand h1{font-size:clamp(30px,5vw,40px);letter-spacing:-.01em}
+.brand h1 span{color:var(--teal)}
+.acct{font-size:14px;color:var(--muted);text-align:right}
+.acct b{color:var(--ink)}
+.hero{margin:clamp(18px,4vw,36px) 0 clamp(14px,3vw,24px)}
+.hero h2{font-size:clamp(26px,4.4vw,40px)}
+.hero p{margin:6px 0 0;color:var(--muted);max-width:40em}
+.who{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.who .lab{font-weight:700;margin-right:4px}
+.chip{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:6px 16px 6px 6px;border-radius:999px;background:var(--surface);border:2px solid var(--line);font-weight:700}
+.chip i{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;color:#fff;font-style:normal;font-family:"Baloo 2",system-ui;font-size:20px}
+.chip[aria-pressed=true]{border-color:var(--teal);box-shadow:0 0 0 3px #2f9e8f33}
+.chip small{display:block;font-weight:500;color:var(--muted);font-size:12px;line-height:1}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:clamp(12px,2.4vw,20px)}
+.tile{position:relative;display:flex;flex-direction:column;gap:10px;background:var(--surface);border-radius:var(--rad);padding:20px;box-shadow:var(--shadow);border:2px solid var(--line);text-decoration:none;min-height:240px;overflow:hidden}
+.tile::before{content:"";position:absolute;inset:0 0 auto;height:8px;background:var(--c)}
+.tile .ic{width:64px;height:64px;border-radius:18px;display:grid;place-items:center;background:#f1f3f5;background:color-mix(in srgb,var(--c) 14%,#fff);font-size:34px}
+.tile .ic img{width:56px;height:56px;border-radius:14px}
+.tile h3{font-size:26px}
+.tile p{margin:0;color:var(--muted);font-size:15px}
+.tile .go{margin-top:auto;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:14px;background:var(--c);color:#fff;font-weight:700;padding:0 18px}
+.tile .soon{margin-top:auto;display:inline-flex;align-self:flex-start;font-weight:700;font-size:13px;border-radius:999px;padding:6px 12px;background:#f1f3f5;color:var(--muted)}
+.tile.live{cursor:pointer;transition:transform .15s}
+.tile.live:hover{transform:translateY(-3px)}
+.prog{font-size:14px;font-weight:600;color:var(--ink);background:#f8f9fa;border-radius:12px;padding:8px 10px}
+.prog .bar{height:8px;border-radius:99px;background:#e9ecef;margin-top:6px;overflow:hidden}.prog .bar i{display:block;height:100%;background:var(--c);border-radius:99px}
+.note{margin-top:clamp(18px,4vw,30px);display:flex;gap:12px;align-items:flex-start;background:#ffffffb3;border:2px dashed var(--line);border-radius:18px;padding:14px 16px;font-size:15px;color:var(--muted)}
+.note b{color:var(--ink)}
+footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}
+@media (max-width:520px){.acct{text-align:left;width:100%}.tile{min-height:0}}
+@media (prefers-reduced-motion:reduce){.tile.live{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="./" aria-label="Uplore home">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect x="6" y="38" width="14" height="20" rx="4" fill="#9fd8cf"/><rect x="25" y="27" width="14" height="31" rx="4" fill="#5cbcae"/><rect x="44" y="15" width="14" height="43" rx="4" fill="#2f9e8f"/><path d="M51 2.5l2.2 4.6 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5-3.6-3.5 5-.7z" fill="#ffd166" stroke="#e0a800" stroke-width="1" stroke-linejoin="round"/></svg>
+      <h1><span>Up</span>lore</h1>
+    </a>
+    <div class="acct" id="acct"></div>
+  </header>
+
+  <section class="hero">
+    <h2 id="hello">What shall we learn today?</h2>
+    <p>One home for the whole family: pick a learner, then a subject. Progress is saved for each learner.</p>
+    <div class="who" id="who"></div>
+  </section>
+
+  <section class="grid" id="subjects" aria-label="Subjects"></section>
+
+  <div class="note" id="note"></div>
+
+  <footer><span>© Uplore</span><a href="maths/privacy.html">Privacy</a></footer>
+</div>
+
+<script>
+// Uplore home. Reads the same learners and sign-in as Pip Maths (same web address, same storage).
+(function () {
+  'use strict';
+  var KEY = 'pipmaths.v1', SKEY = 'pipmaths.session';
+  var MATHS_LESSONS = 373;
+  function read(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
+  function write(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  var $ = function (id) { return document.getElementById(id); };
+
+  var demo = /[?&]demo/.test(location.search);
+  var state = read(KEY) || { profiles: [], active: null, settings: {} };
+  if (demo && !state.profiles.length) state = { profiles: [
+    { id: 'd1', name: 'Asha', age: 9, color: '#ff6b4a', progress: { a: { a: [[1, 1]], mastered: 1 }, b: { a: [[1, 1]] }, c: { a: [[1, 1]] } } },
+    { id: 'd2', name: 'Ravi', age: 14, color: '#4c6ef5', progress: { a: { a: [[1, 1]] } } },
+    { id: 'd3', name: 'Mum', age: 38, color: '#2f9e44', progress: {} }], active: 'd1', settings: {} };
+  var session = read(SKEY);
+
+  function learner() { for (var i = 0; i < state.profiles.length; i++) if (state.profiles[i].id === state.active) return state.profiles[i]; return null; }
+  function stats(p) { var tried = 0, mastered = 0, pr = (p && p.progress) || {}; for (var k in pr) { if (pr[k] && pr[k].a && pr[k].a.length) tried++; if (pr[k] && pr[k].mastered) mastered++; } return { tried: tried, mastered: mastered }; }
+
+  var SUBJECTS = [
+    { id: 'maths', name: 'Maths', live: true, href: 'maths/', c: 'var(--maths)', icon: '<img src="maths/img/icon-64.png" alt="" onerror="this.replaceWith(document.createTextNode(\'🔢\'))">',
+      text: 'Pip Maths: JK to grown-ups. School maths, tables, tricks, Vedic maths, logic, exam papers.' },
+    { id: 'english', name: 'English', c: 'var(--english)', icon: '📖', soon: 'Being built now',
+      text: 'Letter sounds, reading, spelling, grammar, vocabulary and writing. For first and second-language learners.' },
+    { id: 'computers', name: 'Computers', c: 'var(--computers)', icon: '💻', soon: 'Coming later',
+      text: 'How computers think: logic, programming, databases, security and AI.' },
+    { id: 'french', name: 'French', c: 'var(--french)', icon: '🥐', soon: 'Coming later',
+      text: 'Words, phrases and conversation, step by step.' }
+  ];
+
+  function render() {
+    var p = learner();
+    $('hello').textContent = p ? 'Hello, ' + p.name + '! What shall we learn today?' : 'What shall we learn today?';
+    // Learner chips
+    var who = $('who');
+    if (!state.profiles.length) who.innerHTML = '<span class="lab">No learners yet.</span> <a class="chip" href="maths/" style="padding:6px 16px"><b>Add a learner in Maths →</b></a>';
+    else who.innerHTML = '<span class="lab">Who is learning?</span>' + state.profiles.map(function (q) {
+      return '<button class="chip" data-id="' + esc(q.id) + '" aria-pressed="' + (q.id === state.active) + '"><i style="background:' + esc(q.color || '#2f9e8f') + '">' + esc((q.name || '?').charAt(0).toUpperCase()) + '</i><span>' + esc(q.name) + '<small>age ' + esc(q.age) + '</small></span></button>';
+    }).join('');
+    Array.prototype.forEach.call(who.querySelectorAll('button.chip'), function (b) {
+      b.onclick = function () { state.active = b.getAttribute('data-id'); if (!demo) { var s = read(KEY) || state; s.active = state.active; write(KEY, s); } render(); };
+    });
+    // Subject tiles
+    var st = stats(p);
+    $('subjects').innerHTML = SUBJECTS.map(function (s) {
+      var prog = s.id === 'maths' && p ? '<div class="prog">' + esc(p.name) + ': ' + st.tried + ' lessons practised · ' + st.mastered + ' mastered<div class="bar"><i style="width:' + Math.min(100, Math.round(st.tried / MATHS_LESSONS * 100)) + '%"></i></div></div>' : '';
+      var inner = '<div class="ic">' + s.icon + '</div><h3>' + s.name + '</h3><p>' + s.text + '</p>' + prog + (s.live ? '<span class="go">Open ' + s.name + ' →</span>' : '<span class="soon">' + s.soon + '</span>');
+      return s.live ? '<a class="tile live" style="--c:' + s.c + '" href="' + s.href + '">' + inner + '</a>' : '<div class="tile" style="--c:' + s.c + '" aria-disabled="true">' + inner + '</div>';
+    }).join('');
+    // Account
+    var email = session && session.user && session.user.email;
+    $('acct').innerHTML = email ? 'Family account<br><b>' + esc(email) + '</b>' : '<a href="maths/">Sign in</a> to back up and sync';
+    $('note').innerHTML = email
+      ? '<span>☁️</span><span><b>Backed up.</b> Learners and progress sync across your devices. Manage the family account in Maths → Grown-ups.</span>'
+      : '<span>📱</span><span><b>Everything works without an account.</b> Learners and progress are kept on this device. To back up and use them on other devices, create a family account in Maths → Grown-ups.</span>';
+  }
+  render();
+  window.addEventListener('storage', function (e) { if (e.key === KEY || e.key === SKEY) { state = read(KEY) || state; session = read(SKEY); render(); } });
+})();
+</script>
+</body>
+</html>
