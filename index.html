@@ -325,7 +325,7 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
       var em = $('em') && $('em').value.trim(), pw = $('pw') && $('pw').value, label = document.querySelector('#f .go').textContent;
       busy(true, 'Please wait…');
       try {
-        if (view === 'signin') { await afterSignIn(await call('/auth/v1/token?grant_type=password', { method: 'POST', body: { email: em, password: pw } })); close(); render(); }
+        if (view === 'signin') { await afterSignIn(await call('/auth/v1/token?grant_type=password', { method: 'POST', body: { email: em, password: pw } })); close(); render(); if (backTo && state.profiles.length) { location.href = backTo; return; } }
         else if (view === 'signup') {
           var d = await call('/auth/v1/signup?redirect_to=' + encodeURIComponent(HOME), { method: 'POST', body: { email: em, password: pw } });
           if (d && d.access_token) { await afterSignIn(d); close(); render(); }
@@ -368,8 +368,20 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
         cur.profiles.forEach(function (q) { if (q.id === p.id) syn[q.id] = body(q); }); write('pipmaths.synced', syn); })
       .catch(function () {});
   }
+  // Maths sends visitors here to sign in (#signin), or after their sign-in ended (#signin-again).
+  // After signing in they go straight back to Maths (if the family has learners already).
+  var backTo = null;
+  function fromMaths() {
+    var hs = location.hash; if (hs !== '#signin' && hs !== '#signin-again') return;
+    history.replaceState(null, '', location.pathname + location.search);
+    if (session && session.access_token) return;
+    backTo = 'maths/';
+    open('signin', hs === '#signin-again' ? 'Your sign-in has ended. Please sign in again.' : 'Please sign in to open Maths.');
+    var m = $('msg'); if (m) m.className = 'msg ok';
+  }
   fromEmailLink();
   render();
+  fromMaths();
   window.addEventListener('storage', function (e) { if (e.key === KEY || e.key === SKEY) { state = read(KEY) || state; session = read(SKEY); render(); } });
 })();
 </script>
