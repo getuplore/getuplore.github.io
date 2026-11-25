@@ -28,6 +28,8 @@ header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:s
 .brand h1 span{color:var(--teal)}
 .acct{font-size:14px;color:var(--muted);text-align:right}
 .acct b{color:var(--ink)}
+.acct .out{margin-top:6px;font-weight:700;color:var(--teal);text-decoration:underline;text-underline-offset:3px;min-height:32px}
+.acct .warn{display:block;max-width:22em;margin-top:4px;color:#b54708;font-size:13px}
 .hero{margin:clamp(18px,4vw,36px) 0 clamp(14px,3vw,24px)}
 .hero h2{font-size:clamp(26px,4.4vw,40px)}
 .hero p{margin:6px 0 0;color:var(--muted);max-width:40em}
@@ -128,16 +130,38 @@ footer{margin-top:28px;font-size:13px;color:var(--muted);display:flex;gap:14px;f
     // Subject tiles
     var st = stats(p);
     $('subjects').innerHTML = SUBJECTS.map(function (s) {
-      var prog = s.id === 'maths' && p ? '<div class="prog">' + esc(p.name) + ': ' + st.tried + ' lessons practised · ' + st.mastered + ' mastered<div class="bar"><i style="width:' + Math.min(100, Math.round(st.tried / MATHS_LESSONS * 100)) + '%"></i></div></div>' : '';
+      var prog = s.id === 'maths' && p ? '<div class="prog">' + esc(p.name) + ': ' + st.tried + (st.tried === 1 ? ' lesson' : ' lessons') + ' practised · ' + st.mastered + ' mastered<div class="bar"><i style="width:' + Math.min(100, Math.round(st.tried / MATHS_LESSONS * 100)) + '%"></i></div></div>' : '';
       var inner = '<div class="ic">' + s.icon + '</div><h3>' + s.name + '</h3><p>' + s.text + '</p>' + prog + (s.live ? '<span class="go">Open ' + s.name + ' →</span>' : '<span class="soon">' + s.soon + '</span>');
       return s.live ? '<a class="tile live" style="--c:' + s.c + '" href="' + s.href + '">' + inner + '</a>' : '<div class="tile" style="--c:' + s.c + '" aria-disabled="true">' + inner + '</div>';
     }).join('');
     // Account
     var email = session && session.user && session.user.email;
-    $('acct').innerHTML = email ? 'Family account<br><b>' + esc(email) + '</b>' : '<a href="maths/">Sign in</a> to back up and sync';
+    $('acct').innerHTML = email ? 'Family account<br><b>' + esc(email) + '</b><br><button class="out" id="out">Sign out</button><span class="warn" id="warn" hidden></span>' : '<a href="maths/">Sign in</a> to back up and sync';
+    if (email) $('out').onclick = signOut;
     $('note').innerHTML = email
       ? '<span>☁️</span><span><b>Backed up.</b> Learners and progress sync across your devices. Manage the family account in Maths → Grown-ups.</span>'
       : '<span>📱</span><span><b>Everything works without an account.</b> Learners and progress are kept on this device. To back up and use them on other devices, create a family account in Maths → Grown-ups.</span>';
+  }
+  // Sign out, the same way Maths does it: only when everything is backed up (or on a second tap),
+  // then end this device's session and clear this family's learners from the device.
+  var SB = 'https://kafkrkcuogvurfhigksk.supabase.co', SBKEY = 'sb_publishable_OYg8qCsdnHd0Dx_3JXcpBw_ZqBApST6';
+  function body(p) { var r = {}; for (var k in p) if (k !== 'id' && k !== 'name' && k !== 't') r[k] = p[k]; return JSON.stringify(r) + '|' + p.name; }
+  function backedUp() { var syn = read('pipmaths.synced') || {}, s = read(KEY) || { profiles: [] }; for (var i = 0; i < s.profiles.length; i++) if (syn[s.profiles[i].id] !== body(s.profiles[i])) return false; return true; }
+  var armed = false;
+  function signOut() {
+    if (!demo && !backedUp() && !armed) {
+      armed = true; $('out').textContent = 'Sign out anyway';
+      var w = $('warn'); w.hidden = false; w.innerHTML = 'Some progress on this device is not backed up yet. <a href="maths/">Open Maths</a> to back it up first.';
+      return;
+    }
+    var tok = session && session.access_token;
+    if (!demo) {
+      try { localStorage.removeItem(SKEY); localStorage.removeItem('pipmaths.synced'); } catch (e) {}
+      var s = read(KEY) || {}; s.profiles = []; s.active = null; write(KEY, s);
+      if (tok) try { fetch(SB + '/auth/v1/logout?scope=local', { method: 'POST', headers: { apikey: SBKEY, Authorization: 'Bearer ' + tok } }).catch(function () {}); } catch (e) {}
+    }
+    session = null; state = { profiles: [], active: null, settings: state.settings || {} }; armed = false;
+    render();
   }
   render();
   window.addEventListener('storage', function (e) { if (e.key === KEY || e.key === SKEY) { state = read(KEY) || state; session = read(SKEY); render(); } });
