@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Uplore admin</title>
+<meta name="theme-color" content="#2f9e8f">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Uplore admin: one section per subject, so new subjects slot in without crowding the family pages. */
+:root{--bg:#fdf8ef;--ink:#22303c;--muted:#5d6b78;--line:#22303c1a;--teal:#2f9e8f;--maths:#ff6b4a;--english:#4c6ef5;--computers:#2f9e44;--french:#d6336c}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 16px/1.5 Inter,system-ui,sans-serif}
+a{color:inherit}
+h1,h2{font-family:"Baloo 2",system-ui,sans-serif;line-height:1.05;margin:0}
+.wrap{max-width:1040px;margin:0 auto;padding:clamp(16px,4vw,40px)}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+header h1{font-size:clamp(30px,5vw,40px)}header h1 span{color:var(--teal)}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:12px;font-weight:700;font-size:15px;border:2px solid var(--line);background:#fff;text-decoration:none}
+.btn.pri{background:var(--teal);border-color:var(--teal);color:#fff}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0 16px}
+.tabs button{font:inherit;font-weight:700;min-height:44px;padding:0 16px;border-radius:999px;border:2px solid var(--line);background:#fff;cursor:pointer;color:var(--ink)}
+.tabs button[aria-selected=true]{border-color:var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 25%,transparent)}
+.tabs button[disabled]{color:var(--muted);cursor:default}
+.panel{background:#fff;border-radius:22px;border:2px solid var(--line);box-shadow:0 6px 0 #22303c14;padding:clamp(16px,3vw,28px);position:relative;overflow:hidden}
+.panel::before{content:"";position:absolute;inset:0 0 auto;height:8px;background:var(--c)}
+.panel h2{font-size:30px;margin-bottom:14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.kpis div{background:#f8f9fa;border-radius:14px;padding:12px 14px}.kpis b{display:block;font:800 32px/1.1 "Baloo 2",system-ui}.kpis span{font-size:14px;color:var(--muted)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:22px}
+h3{font-size:15px;color:var(--muted);margin:0 0 8px}
+.bars{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.bars li{display:grid;grid-template-columns:minmax(0,1fr) 2.5em;gap:10px;align-items:center;font-size:15px}
+.bars i{display:block;height:8px;border-radius:99px;background:#e9ecef;margin-top:4px;overflow:hidden}.bars i::after{content:"";display:block;height:100%;width:var(--w);background:var(--c)}
+.bars b{text-align:right}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}
+.note{color:var(--muted);font-size:14px;margin:16px 0 0}
+.msg{background:#fff;border-radius:18px;border:2px dashed var(--line);padding:20px;margin-top:24px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><h1><span>Up</span>lore admin</h1><a class="btn" href="../">← Uplore</a></header>
+  <main id="main"><p class="msg">Checking your account…</p></main>
+</div>
+<script>
+(function () {
+  'use strict';
+  var SB = 'https://kafkrkcuogvurfhigksk.supabase.co', SBKEY = 'sb_publishable_OYg8qCsdnHd0Dx_3JXcpBw_ZqBApST6', SKEY = 'pipmaths.session';
+  var $ = function (id) { return document.getElementById(id); };
+  function read(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  var session = read(SKEY);
+
+  // Each subject keeps its own tables (schema); add a line here when a subject gets an admin overview.
+  var SUBJECTS = [
+    { id: 'maths', name: 'Maths', c: 'var(--maths)', schema: 'Math_schema', skills: '../maths/content/skills.json', lessons: '../maths/#admin' },
+    { id: 'english', name: 'English', c: 'var(--english)' },
+    { id: 'computers', name: 'Computers', c: 'var(--computers)' },
+    { id: 'french', name: 'French', c: 'var(--french)' }
+  ];
+  var REGION = { india: 'India', us: 'USA', canada: 'Canada', uk: 'UK' }, MODE = { little: 'Little Learners', explore: 'Explorers', achieve: 'Achievers', adult: 'Adults' };
+
+  async function renew() {
+    var stored = read(SKEY);
+    if (stored && stored.refresh_token !== session.refresh_token) { session = stored; return; }
+    var r = await fetch(SB + '/auth/v1/token?grant_type=refresh_token', { method: 'POST', headers: { apikey: SBKEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ refresh_token: session.refresh_token }) });
+    var d = await r.json().catch(function () { return null; });
+    if (!r.ok || !d || !d.access_token) throw new Error('signin');
+    session = { access_token: d.access_token, refresh_token: d.refresh_token, expires_at: +d.expires_at || Math.floor(Date.now() / 1000) + (+d.expires_in || 3600), user: session.user };
+    try { localStorage.setItem(SKEY, JSON.stringify(session)); } catch (e) {}
+  }
+  async function rpc(schema, fn, again) {
+    var r;
+    try { r = await fetch(SB + '/rest/v1/rpc/' + fn, { method: 'POST', headers: { apikey: SBKEY, Authorization: 'Bearer ' + session.access_token, 'Content-Type': 'application/json', 'Accept-Profile': schema, 'Content-Profile': schema }, body: '{}' }); }
+    catch (e) { throw new Error('No internet connection. Please try again.'); }
+    if (r.status === 401 && !again) { await renew(); return rpc(schema, fn, true); }
+    var d = await r.json().catch(function () { return null; });
+    if (!r.ok) throw new Error((d && (d.message || d.msg)) || 'Something went wrong (' + r.status + ').');
+    return d;
+  }
+  function stop(html) { $('main').innerHTML = '<p class="msg">' + html + '</p>'; }
+
+  var current = 'maths';
+  function tabs() {
+    return '<div class="tabs" role="tablist">' + SUBJECTS.map(function (s) {
+      return '<button role="tab" style="--c:' + s.c + '" data-s="' + s.id + '" aria-selected="' + (s.id === current) + '"' + (s.schema ? '' : ' disabled') + '>' + s.name + (s.schema ? '' : ' · soon') + '</button>';
+    }).join('') + '</div>';
+  }
+  function bars(obj, names) {
+    var keys = Object.keys(obj || {}).sort(function (a, b) { return obj[b] - obj[a]; }), max = Math.max.apply(null, keys.map(function (k) { return obj[k]; }).concat([1]));
+    if (!keys.length) return '<p class="note">None yet.</p>';
+    return '<ul class="bars">' + keys.map(function (k) { return '<li><span>' + esc(names[k] || (k === 'unknown' ? 'Not set' : k)) + '<i style="--w:' + Math.round(obj[k] / max * 100) + '%"></i></span><b>' + esc(obj[k]) + '</b></li>'; }).join('') + '</ul>';
+  }
+  async function show() {
+    var s = SUBJECTS.filter(function (x) { return x.id === current; })[0];
+    $('main').innerHTML = tabs() + '<section class="panel" style="--c:' + s.c + '"><h2>' + s.name + '</h2><p class="note">Loading…</p></section>';
+    wire();
+    try {
+      var o = await rpc(s.schema, 'admin_overview');
+      var titles = {}; try { var sk = await (await fetch(s.skills)).json(); (sk.skills || []).forEach(function (x) { titles[x.id] = typeof x.title === 'object' ? x.title.en : x.title; }); } catch (e) {}
+      var top = {}; (o.topLessons || []).forEach(function (x) { top[x.id] = x.learners; });
+      var names = {}; Object.keys(top).forEach(function (k) { names[k] = titles[k] || k; });
+      $('main').innerHTML = tabs() + '<section class="panel" style="--c:' + s.c + '"><h2>' + s.name + '</h2>' +
+        '<div class="kpis"><div><b>' + esc(o.families) + '</b><span>families</span></div><div><b>' + esc(o.learners) + '</b><span>learners</span></div><div><b>' + esc(o.active7) + '</b><span>active this week</span></div><div><b>' + esc(o.newFamilies30) + '</b><span>new families (30 days)</span></div></div>' +
+        '<div class="cols"><div><h3>Countries</h3>' + bars(o.byCountry, REGION) + '</div><div><h3>Age groups</h3>' + bars(o.byMode, MODE) + '</div><div><h3>Most practised lessons (learners)</h3>' + bars(top, names) + '</div></div>' +
+        '<div class="row"><a class="btn pri" href="' + s.lessons + '">Every lesson in every mode →</a><a class="btn" href="../maths/diag.html">Device check</a></div>' +
+        '<p class="note">Totals only: no names or emails.</p></section>';
+      wire();
+    } catch (e) { stop(esc(e.message === 'signin' ? 'Your sign-in has ended.' : e.message) + ' <a href="../#signin">Sign in</a>'); }
+  }
+  function wire() { Array.prototype.forEach.call(document.querySelectorAll('[data-s]'), function (b) { b.onclick = function () { if (b.disabled) return; current = b.getAttribute('data-s'); show(); }; }); }
+
+  (async function start() {
+    if (!session || !session.access_token) return stop('Please <a href="../#signin">sign in</a> first.');
+    var yes = false;
+    try { yes = await rpc('Math_schema', 'is_admin'); } catch (e) { if (e.message === 'signin') return stop('Your sign-in has ended. <a href="../#signin">Sign in</a>'); }
+    if (yes !== true) return stop('This page is only for the Uplore owner. <a href="../">Back to Uplore</a>');
+    show();
+  })();
+})();
+</script>
+</body>
+</html>
